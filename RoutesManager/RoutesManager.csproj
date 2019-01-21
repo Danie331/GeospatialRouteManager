@@ -2,11 +2,28 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <UserSecretsId>cdf7c988-a2f9-48c9-8b77-f2d92908a1db</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="jQuery.UI.Combined" Version="1.12.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\js\components\" />
+    <Folder Include="wwwroot\js\services\" />
+    <Folder Include="wwwroot\lib\leaflet\" />
+    <Folder Include="wwwroot\lib\leaflet-icon-pulse\" />
+    <Folder Include="wwwroot\lib\esri-geocode\" />
+    <Folder Include="wwwroot\lib\slidermenu\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\default.html" />
+    <None Include="wwwroot\index.html" />
+    <None Include="wwwroot\js\app.js" />
   </ItemGroup>
 
 </Project>

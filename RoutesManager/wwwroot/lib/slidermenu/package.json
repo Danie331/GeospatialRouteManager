@@ -1,0 +1,30 @@
+{
+  "name": "slidemenu",
+  "version": "0.1.2",
+  "devDependencies": {
+    "grunt": "latest",
+    "grunt-contrib-copy": "latest",
+    "grunt-contrib-less": "latest",
+    "grunt-contrib-uglify": "latest",
+    "grunt-contrib-jshint": "latest",
+    "grunt-jsbeautifier": "latest"
+  },
+  "description": "A jQuery plugin for a slide menu with fun interactions",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fissionman924/slidemenu.git"
+  },
+  "author": "Nathaniel Lord",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fissionman924/slidemenu/issues"
+  },
+  "homepage": "https://github.com/fissionman924/slidemenu"
+}

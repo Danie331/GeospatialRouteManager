@@ -1,0 +1,28 @@
+# Mac
+.DS_Store
+Icon
+._*
+.Spotlight-V100
+
+# SublimeText
+/*.sublime-project
+*.sublime-workspace
+*.sublime-project
+.idea/*
+
+# Node
+node_modules
+npm-debug.log
+
+# Coverage
+coverage
+
+# Debugging Files
+debug/*
+!debug/sample.html
+
+# Built Files and watch cache
+dist/
+build
+
+*.zip
