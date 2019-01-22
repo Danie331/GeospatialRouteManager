@@ -6,22 +6,32 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\js\components\**" />
+    <Compile Remove="wwwroot\js\services\**" />
+    <Content Remove="wwwroot\js\components\**" />
+    <Content Remove="wwwroot\js\services\**" />
+    <EmbeddedResource Remove="wwwroot\js\components\**" />
+    <EmbeddedResource Remove="wwwroot\js\services\**" />
+    <None Remove="wwwroot\js\components\**" />
+    <None Remove="wwwroot\js\services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="jQuery.UI.Combined" Version="1.12.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\js\components\" />
-    <Folder Include="wwwroot\js\services\" />
+    <Folder Include="wwwroot\js\controllers\" />
+    <Folder Include="wwwroot\js\models\" />
+    <Folder Include="wwwroot\js\views\" />
     <Folder Include="wwwroot\lib\leaflet\" />
     <Folder Include="wwwroot\lib\leaflet-icon-pulse\" />
-    <Folder Include="wwwroot\lib\esri-geocode\" />
     <Folder Include="wwwroot\lib\slidermenu\" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\default.html" />
     <None Include="wwwroot\index.html" />
     <None Include="wwwroot\js\app.js" />
   </ItemGroup>

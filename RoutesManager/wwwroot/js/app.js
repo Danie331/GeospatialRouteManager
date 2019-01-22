@@ -3,11 +3,11 @@
 (function init() {
     $(function () {
         app.loadMap();
-        app.loadSlidePanel();
+        app.createMenu();
     });
 
-    app.loadSlidePanel = function () {
-        $(".slide-menu").slidemenu();
+    app.createMenu = function () {
+        $(".slide-menu").slidemenu();       
     };
 
     app.loadMap = function () {
@@ -68,4 +68,4 @@
             console.log(`{Error in app.loadMap: ${e}}`);
         }
     };
-})();
+})(app);

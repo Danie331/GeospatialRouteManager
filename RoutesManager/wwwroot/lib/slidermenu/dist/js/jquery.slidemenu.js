@@ -93,7 +93,11 @@ Slide Menu
             top += $(element).height();
         });
 
-        this.$element.off("click").on("click", ".menu-item, .menu-body", this, this.menuClick);
+        this.$element.off("click").on("click", ".menu-item, .menu-body, .menu-close", this, this.menuClick);      
+        $('.menu-item.open').trigger('click');
+
+        // wire up the external "show menu" button
+        $("#menutoggle").off('click').on('click', this, this.reload);
     };
 
     SlideMenu.prototype.menuClick = function(event) {
@@ -102,13 +106,18 @@ Slide Menu
             event.stopPropagation();
             return;
         }
+        if ($(event.currentTarget).hasClass("menu-close")) {
+            $('.slide-menu').hide();
+            $("#menutoggle").show();
+        }
         if ($(event.currentTarget).hasClass(CLASSES.ACTIVE)) { //Close this menu item since it's the only one open
-            instance.close(event, instance);
+           // do nothing
         } else if ($(event.currentTarget).parents(".slide-menu").hasClass(CLASSES.ACTIVE)) { //Close open menu and move new menu into place
             instance.switchMenus(event, instance);
         } else { //Open the menu that was selected
             instance.openMenu(event, instance);
         }
+        event.stopPropagation();
     };
 
     SlideMenu.prototype.getDefaults = function() {
@@ -461,6 +470,12 @@ Slide Menu
     SlideMenu.prototype.isOpen = function() {
         return this.$element.hasClass(CLASSES.ACTIVE);
     };
+
+    SlideMenu.prototype.reload = function (event) {
+        $('.slide-menu').show();
+        $('.menu-item.open').trigger('click');
+        $("#menutoggle").hide();
+    }
 
     SlideMenu.prototype.destroy = function() {
         this.$element.css("width", "").css("height", "").css("top", "");

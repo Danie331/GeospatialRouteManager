@@ -15,7 +15,6 @@ Slide Menu
   height: 100%;
   z-index: 1000;
   left: 100%;
-  display: none;
 }
 .slide-menu.left-side {
   left: 0%;
@@ -107,4 +106,17 @@ Slide Menu
 
 .menu-body {
     width: 500px !important;
+}
+
+#menutoggle {
+    width: 0px;
+    height: 0px;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 10px solid blue;
+    position: absolute;
+    z-index: 100000;
+    cursor: pointer;
+    display: none;
+    margin: 2px;
 }
