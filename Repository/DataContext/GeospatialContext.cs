@@ -30,7 +30,7 @@ namespace Repository.DataContext
                     .HasMaxLength(255)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Polygon)
+                entity.Property(e => e.GeoLayer)
                 .HasColumnName("geo_polygon")
                 .HasColumnType("geography");
             });

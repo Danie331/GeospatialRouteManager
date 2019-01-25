@@ -16,9 +16,14 @@ namespace Services.Core
             _geospatialRepository = geospatialRepository;
         }
 
-        public async Task<List<Area>> GetAreasAsync()
+        public async Task<GeoSpatialLayer> SaveGeoLayerAsync(GeoSpatialLayer layer)
         {
-            var areas = await _geospatialRepository.GetAreasAsync();
+            return await _geospatialRepository.SaveGeoLayerAsync(layer);
+        }
+
+        public async Task<List<GeoSpatialLayer>> GetMyAreasAsync()
+        {
+            var areas = await _geospatialRepository.GetMyAreasAsync();
             return areas;
         }
     }

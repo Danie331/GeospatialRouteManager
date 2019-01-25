@@ -1,5 +1,5 @@
 ﻿
-using NetTopologySuite.Geometries;
+using GeoAPI.Geometries;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Repository.DataModels
@@ -11,6 +11,6 @@ namespace Repository.DataModels
         public string AreaName { get; set; }
 
         [Column(TypeName = "geography")]
-        public Polygon Polygon { get; set; }
+        public IGeometry GeoLayer { get; set; }
     }
 }

@@ -6,6 +6,7 @@ namespace Services.Contract
 {
     public interface IGeospatialService
     {
-        Task<List<Area>> GetAreasAsync();
+        Task<GeoSpatialLayer> SaveGeoLayerAsync(GeoSpatialLayer layer);
+        Task<List<GeoSpatialLayer>> GetMyAreasAsync();
     }
 }

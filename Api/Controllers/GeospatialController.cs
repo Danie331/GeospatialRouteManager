@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using DomainModels.Geospatial;
 using Microsoft.AspNetCore.Mvc;
 using Services.Contract;
 
@@ -19,11 +20,21 @@ namespace Api.Controllers
             _mapper = mapper;
         }
 
-        [Route("areas")]
-        public async Task<List<ApiDto.Area>> GetAreas()
+        [HttpPost]
+        [Route("savelayer")]
+        public async Task<ApiDto.GeoFeatureLayer> SaveGeoLayer(ApiDto.GeoFeatureLayer layer)
         {
-            var result = await _geospatialService.GetAreasAsync();
-            return _mapper.Map<List<ApiDto.Area>>(result);
+            var geoLayerDto = _mapper.Map<GeoSpatialLayer>(layer);
+           var result = await _geospatialService.SaveGeoLayerAsync(geoLayerDto);
+            return _mapper.Map<ApiDto.GeoFeatureLayer>(result);
+        }
+
+        [HttpGet]
+        [Route("myareas")]
+        public async Task<List<ApiDto.GeoFeatureLayer>> GetMyAreas()
+        {
+            var result = await _geospatialService.GetMyAreasAsync();
+            return _mapper.Map<List<ApiDto.GeoFeatureLayer>>(result);
         }
     }
 }

@@ -23,9 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\js\controllers\" />
-    <Folder Include="wwwroot\js\models\" />
-    <Folder Include="wwwroot\js\views\" />
     <Folder Include="wwwroot\lib\leaflet\" />
     <Folder Include="wwwroot\lib\leaflet-icon-pulse\" />
     <Folder Include="wwwroot\lib\slidermenu\" />
@@ -33,7 +30,7 @@
 
   <ItemGroup>
     <None Include="wwwroot\index.html" />
-    <None Include="wwwroot\js\app.js" />
+    <None Include="wwwroot\js\App.js" />
   </ItemGroup>
 
 </Project>

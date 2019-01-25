@@ -6,10 +6,11 @@
     <title>Route Manager</title>
     <link href="css/site.css" rel="stylesheet" />
     <link href="lib/slidermenu/dist/css/slidemenu.css" rel="stylesheet" />
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
     <link rel="stylesheet" href="/lib/leaflet/leaflet.css" />
     <link rel="stylesheet" href="/lib/leaflet-icon-pulse/dist/L.Icon.Pulse.css" />
     <link rel="stylesheet" href="https://unpkg.com/esri-leaflet-geocoder@2.2.13/dist/esri-leaflet-geocoder.css" integrity="sha512-v5YmWLm8KqAAmg5808pETiccEohtt8rPVMGQ1jA6jqkWVydV5Cuz3nJ9fQ7ittSxvuqsvI9RSGfVoKPaAJZ/AQ==" crossorigin="">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css" />
 </head>
 <body>
     <div id="menutoggle"></div>
@@ -18,13 +19,13 @@
     <!-- componentize this -->
     <div class="slide-menu left-side">
         <ul class="menu-items">
-            <li class="menu-item open" title="My Next Delivery">
+            <li class="menu-item open" title="My Areas">
                 <div class="menu-header">
                     <div class="menu-icon">
-                        <i class="fa fa-book"></i>
+                        <i class="fas fa-draw-polygon"></i>
                     </div>
                     <div class="menu-content">
-                        <span>My Next Delivery</span>
+                        <span>My Areas</span>
                     </div>
                     <div class="menu-close">
                         <i class="fa fa-times"></i>
@@ -34,61 +35,13 @@
                     <h1>[Features coming soon...]</h1>
                 </div>
             </li>
-            <li class="menu-item" title="Route Timetable Planner">
+            <li class="menu-item" title="Map Settings">
                 <div class="menu-header">
                     <div class="menu-icon">
-                        <i class="fa fa-calendar"></i>
+                        <i class="fas fa-globe"></i>
                     </div>
                     <div class="menu-content">
-                        <span>Route Timetable Planner</span>
-                    </div>
-                    <div class="menu-close">
-                        <i class="fa fa-times"></i>
-                    </div>
-                </div>
-                <div class="menu-body">
-                    <h1>[Features coming soon...]</h1>
-                </div>
-            </li>
-            <li class="menu-item" title="My Uploads">
-                <div class="menu-header">
-                    <div class="menu-icon">
-                        <i class="fa fa-folder-open"></i>
-                    </div>
-                    <div class="menu-content">
-                        <span>My Uploads</span>
-                    </div>
-                    <div class="menu-close">
-                        <i class="fa fa-times"></i>
-                    </div>
-                </div>
-                <div class="menu-body">
-                    <h1>[Features coming soon...]</h1>
-                </div>
-            </li>
-            <li class="menu-item" title="Location Finder">
-                <div class="menu-header">
-                    <div class="menu-icon">
-                        <i class="fa fa-search"></i>
-                    </div>
-                    <div class="menu-content">
-                        <span>Location Finder</span>
-                    </div>
-                    <div class="menu-close">
-                        <i class="fa fa-times"></i>
-                    </div>
-                </div>
-                <div class="menu-body">
-                    <h1>[Features coming soon...]</h1>
-                </div>
-            </li>
-            <li class="menu-item" title="Communications">
-                <div class="menu-header">
-                    <div class="menu-icon">
-                        <i class="fa fa-phone"></i>
-                    </div>
-                    <div class="menu-content">
-                        <span>Communications</span>
+                        <span>Map Settings</span>
                     </div>
                     <div class="menu-close">
                         <i class="fa fa-times"></i>
@@ -108,7 +61,6 @@
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
             crossorigin="anonymous"></script>
     <script src="lib/slidermenu/dist/js/jquery.slidemenu.js"></script>
-    <script src="/js/app.js"></script>
     <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDQ3eXd26fw0zaOG95D4u5vgki7asjfY4I&callback=app.loadMap" async defer></script>-->
     <script src="/lib/leaflet/leaflet.js"></script>
     <script src="https://unpkg.com/esri-leaflet@2.2.3/dist/esri-leaflet.js"
@@ -118,5 +70,19 @@
     <script src="https://unpkg.com/esri-leaflet-geocoder@2.2.13/dist/esri-leaflet-geocoder.js"
             integrity="sha512-zdT4Pc2tIrc6uoYly2Wp8jh6EPEWaveqqD3sT0lf5yei19BC1WulGuh5CesB0ldBKZieKGD7Qyf/G0jdSe016A=="
             crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js"></script>
+
+    <!-- core scripts -->
+    <script src="js/EventObserver.js"></script>
+
+    <script src="js/controllers/ApiController.js"></script>
+    <script src="js/controllers/MenuController.js"></script>
+    <script src="js/controllers/MapViewController.js"></script>
+
+    <script src="js/views/LeafletMapView.js"></script>
+
+    <script src="js/models/GeoLayerModel.js"></script>
+
+    <script src="js/App.js"></script>
 </body>
 </html>
