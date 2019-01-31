@@ -1,21 +1,38 @@
 ﻿
 class MapViewController {
-    constructor(eventObserver) {       
-        this.$container = $("#map");
-        this.eventObserver = eventObserver;
+    constructor(eventBroker) {       
+        this.$container1 = $("#map");
+        this.eventBroker = eventBroker;
+        this.mapProvider = null;
 
+        this.init();
+    }
+
+    init() {
         this.attachHandlers();
         this.attachEventListeners();
     }
 
+    onSettingsLoaded(userSettings) {
+        switch (userSettings.DefaultMapProvider) {
+            case 'google':
+                this.mapProvider = new GoogleMapView(this, this.eventBroker);
+                break;
+            case 'leaflet':
+                this.mapProvider = new LeafletMapView(this, this.eventBroker);
+                break;
+        }
+    }
+
     attachHandlers() {
-        this.$container.on('click', '.saveGeoLayerButton', {}, this.saveGeoLayerClickHandler.bind(this));
+        this.$container1.on('click', '.saveGeoLayerButton', {}, this.saveGeoLayerClickHandler.bind(this));
     }
 
     attachEventListeners() {
-        this.eventObserver.subscribe(this.onGeoLayerSaving.bind(this), EventType.BEFORE_SAVE_LAYER);
-        this.eventObserver.subscribe(this.onGeoLayerSaved.bind(this), EventType.LAYER_SAVED);
-        this.eventObserver.subscribe(this.onLayerClick.bind(this), EventType.CLICK_LAYER);
+        this.eventBroker.subscribe(this.onGeoLayerSaving.bind(this), EventType.BEFORE_SAVE_LAYER);
+        this.eventBroker.subscribe(this.onGeoLayerSaved.bind(this), EventType.LAYER_SAVED);
+        this.eventBroker.subscribe(this.onLayerClick.bind(this), EventType.CLICK_LAYER);
+        this.eventBroker.subscribe(this.onSettingsLoaded.bind(this), EventType.SETTINGS_LOADED);
     }
 
     saveGeoLayerClickHandler() {
@@ -25,7 +42,7 @@ class MapViewController {
             return;
         }
 
-        this.eventObserver.broadcast(EventType.BEFORE_SAVE_LAYER, { LayerName: layerNameInput.val() });
+        this.eventBroker.broadcast(EventType.BEFORE_SAVE_LAYER, { LayerName: layerNameInput.val() });
     }
 
     onGeoLayerSaving() {
@@ -37,7 +54,7 @@ class MapViewController {
     }
 
     onLayerClick(layerModel) {
-        $('.layerNameInput').val(layerModel.LayerName ? layerModel.LayerName : '');
+        $('.layerNameInput').focus().val(layerModel.LayerName ? layerModel.LayerName : '');
     }
 
     getGeoLayerPopupContent(geoLayer) {

@@ -23,7 +23,7 @@ class LeafletMapView {
 
                     this.map = L.map('map', {
                         center: [coords.latitude, coords.longitude],
-                        zoom: 19,
+                        zoom: 13,
                         dragging: true
                     });
                     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZGFuaWUzMzAiLCJhIjoiY2pxeTlqc242MDE5cTQzcnpubHlyeTJucyJ9.Omq9E98-rSVM2EWccOdFtg', {
@@ -61,28 +61,29 @@ class LeafletMapView {
         var drawControl = new L.Control.Draw({
             position: 'topright',
             draw: {
-                polygon: {
-                    shapeOptions: {
-                        color: 'red'
-                    }
-                }
-            },
-            edit: { featureGroup: this.drawnItems }
+                polygon: true,
+                rectangle: false,
+                circle: false,
+                polyline: false,
+                marker: false,
+                circlemarker: false
+            }
         });
         this.map.addControl(drawControl);
         var parent = this;
         this.map.on(L.Draw.Event.CREATED, function (e) {
             parent.drawnItems.addLayer(e.layer);
-            e.layer.on('click', () => parent.handleLayerClick(e.layer));
+            e.layer.on('click', () => {
+                parent.handleLayerClick(e.layer);
+            }).fireEvent('click');
         });
 
         return this;
     }
 
-    onSaveLayer(metadata) {
-        var layerId = this.activeLayer.myLayerId ? this.activeLayer.myLayerId : 0;
-        var geoLayerModel = new GeoLayerModel(layerId, metadata.LayerName, this.activeLayer.toGeoJSON());
-        this.eventObserver.broadcast(EventType.SAVE_LAYER, geoLayerModel);
+    onSaveLayer(layerNameContainer) {
+        var layerModel = new GeoLayerModel(this.activeLayer.myLayerId, layerNameContainer.LayerName, this.activeLayer.toGeoJSON());
+        this.eventObserver.broadcast(EventType.SAVE_LAYER, layerModel);
     }
 
     onLayerSaved(geoLayerModel) {
@@ -96,7 +97,7 @@ class LeafletMapView {
         }
         this.activeLayer = layer;
         this.activeLayer.editing.enable();
-        var layerModel = new GeoLayerModel(layer.myLayerId, layer.myLayerName, layer.toGeoJSON());
+        var layerModel = new GeoLayerModel(layer.myLayerId, layer.myLayerName, /*layer.toGeoJSON()*/'');
         this.activeLayer.bindPopup(this.viewController.getGeoLayerPopupContent(layerModel)).openPopup();
         this.eventObserver.broadcast(EventType.CLICK_LAYER, layerModel);
     }

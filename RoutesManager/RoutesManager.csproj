@@ -25,12 +25,12 @@
   <ItemGroup>
     <Folder Include="wwwroot\lib\leaflet\" />
     <Folder Include="wwwroot\lib\leaflet-icon-pulse\" />
+    <Folder Include="wwwroot\lib\wicket\" />
     <Folder Include="wwwroot\lib\slidermenu\" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="wwwroot\index.html" />
-    <None Include="wwwroot\js\App.js" />
   </ItemGroup>
 
 </Project>

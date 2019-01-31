@@ -14,6 +14,7 @@ namespace Repository
         public static void RegisterRepository(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IGeospatialRepository, GeospatialRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddDbContext<GeospatialContext>(options =>
                     options.UseSqlServer(configuration.GetConnectionString("GeoSpatial"), x => x.UseNetTopologySuite()));
         }

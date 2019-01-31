@@ -6,7 +6,6 @@ using Repository.Contract;
 using DomainModels.Geospatial;
 using Microsoft.EntityFrameworkCore;
 using Repository.DataContext;
-using NetTopologySuite.IO;
 
 namespace Repository.Core
 {

@@ -2,18 +2,19 @@
 (function init(app) {
 
     $(function () {
-        var eventObserver = new EventObserver();
-        var baseViewController = new MapViewController(eventObserver);
-        new LeafletMapView(baseViewController, eventObserver);
+        var eventBroker = new EventBroker();
 
-        new MenuController(eventObserver);
-        new ApiController(eventObserver);
+        new ApiController(eventBroker);
+
+        new MenuViewController(eventBroker);
+
+        new MapViewController(eventBroker);
 
         app.createMenu();
     });
 
     app.createMenu = function () {
-        $(".slide-menu").slidemenu();       
+        $(".slide-menu").slidemenu();
     };
 
 })(app);

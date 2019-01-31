@@ -11,6 +11,7 @@ namespace Services
         public static void RegisterServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IGeospatialService, GeospatialService>();
+            services.AddScoped<IUserService, UserService>();
 
             Repository.Dependencies.RegisterRepository(services, configuration);
         }

@@ -11,3 +11,11 @@ html, body {
 input[type=button] {
     cursor:pointer;
 }
+
+.menu-margins {
+    margin: 20px;
+}
+
+.float-right {
+    float: right;
+}

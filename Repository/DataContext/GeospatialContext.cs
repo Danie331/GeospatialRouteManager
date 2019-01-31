@@ -17,6 +17,8 @@ namespace Repository.DataContext
 
         public virtual DbSet<SpatialArea> SpatialArea { get; set; }
 
+        public virtual DbSet<Setting> Setting { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<SpatialArea>(entity =>
@@ -33,6 +35,15 @@ namespace Repository.DataContext
                 entity.Property(e => e.GeoLayer)
                 .HasColumnName("geo_polygon")
                 .HasColumnType("geography");
+            });
+
+            modelBuilder.Entity<Setting>(entity =>
+            {
+                entity.ToTable("setting");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.UserId).HasColumnName("user_id").IsRequired(false);
+                entity.Property(e => e.SettingName).HasColumnName("setting_name").HasMaxLength(255).IsUnicode(false);
+                entity.Property(e => e.SettingValue).HasColumnName("setting_value");
             });
         }
     }
