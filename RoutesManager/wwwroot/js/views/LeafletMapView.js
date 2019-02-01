@@ -121,7 +121,8 @@ class LeafletMapView {
                     parent.drawnItems.addLayer(layer);
                 }
             });            
-        });        
+        });   
+        this.eventBroker.broadcast(EventType.AFTER_LAYERS_SHOWN, {});
     }
 
     onSelectLayer(layerModel) {
