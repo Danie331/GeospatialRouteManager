@@ -1,8 +1,8 @@
 ﻿
 class LeafletMapView {
-    constructor(viewController, eventObserver) {
+    constructor(viewController, eventBroker) {
         this.viewController = viewController;
-        this.eventObserver = eventObserver;
+        this.eventBroker = eventBroker;
         this.map = null;
         this.activeLayer = null;
         this.drawnItems = null;
@@ -35,7 +35,7 @@ class LeafletMapView {
 
                     this.enableDrawing();
 
-                    this.eventObserver.broadcast(EventType.MAP_LOADED, {});
+                    this.eventBroker.broadcast(EventType.MAP_LOADED, {});
                 });
             }
         }
@@ -47,9 +47,10 @@ class LeafletMapView {
     }
 
     attachEventListeners() {
-        this.eventObserver.subscribe(this.onSaveLayer.bind(this), EventType.BEFORE_SAVE_LAYER);
-        this.eventObserver.subscribe(this.onLayerSaved.bind(this), EventType.LAYER_SAVED);
-        this.eventObserver.subscribe(this.showLayers.bind(this), EventType.SHOW_ALL_LAYERS);
+        this.eventBroker.subscribe(this.onSaveLayer.bind(this), EventType.BEFORE_SAVE_LAYER);
+        this.eventBroker.subscribe(this.onLayerSaved.bind(this), EventType.LAYER_SAVED);
+        this.eventBroker.subscribe(this.onLayersLoaded.bind(this), EventType.LAYERS_LOADED);
+        this.eventBroker.subscribe(this.onSelectLayer.bind(this), EventType.SELECT_LAYER);
 
         return this;
     }
@@ -61,7 +62,12 @@ class LeafletMapView {
         var drawControl = new L.Control.Draw({
             position: 'topright',
             draw: {
-                polygon: true,
+                polygon: {
+                    shapeOptions: {
+                        color: 'red',
+                        weight: 1
+                    }
+                },
                 rectangle: false,
                 circle: false,
                 polyline: false,
@@ -83,7 +89,7 @@ class LeafletMapView {
 
     onSaveLayer(layerNameContainer) {
         var layerModel = new GeoLayerModel(this.activeLayer.myLayerId, layerNameContainer.LayerName, this.activeLayer.toGeoJSON());
-        this.eventObserver.broadcast(EventType.SAVE_LAYER, layerModel);
+        this.eventBroker.broadcast(EventType.SAVE_LAYER, layerModel);
     }
 
     onLayerSaved(geoLayerModel) {
@@ -99,14 +105,15 @@ class LeafletMapView {
         this.activeLayer.editing.enable();
         var layerModel = new GeoLayerModel(layer.myLayerId, layer.myLayerName, /*layer.toGeoJSON()*/'');
         this.activeLayer.bindPopup(this.viewController.getGeoLayerPopupContent(layerModel)).openPopup();
-        this.eventObserver.broadcast(EventType.CLICK_LAYER, layerModel);
+        this.eventBroker.broadcast(EventType.CLICK_LAYER, layerModel);
     }
 
-    showLayers(layerModelList) {
+    onLayersLoaded(layerModelList) {
         var parent = this;
         layerModelList.forEach(layerModel => {
             L.geoJson(JSON.parse(layerModel.Geojson), {
-                 onEachFeature: function (feature, layer) {
+                onEachFeature: function (feature, layer) {
+                    layer.setStyle({ color: 'red', weight: 1 });
                      layer.myLayerId = layerModel.Id;
                      layer.myLayerName = layerModel.LayerName;
 
@@ -115,5 +122,16 @@ class LeafletMapView {
                 }
             });            
         });        
+    }
+
+    onSelectLayer(layerModel) {
+        var context = this.map;
+        context.eachLayer(function (layer) {
+            if (layer.myLayerId == layerModel.Id) {
+                layer.fireEvent('click');
+                var popupXY = layer.getPopup().getLatLng();
+                context.panTo(popupXY);
+            }
+        });
     }
 }

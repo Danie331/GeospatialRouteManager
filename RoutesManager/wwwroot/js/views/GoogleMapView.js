@@ -1,8 +1,8 @@
 ﻿
 class GoogleMapView {
-    constructor(viewController, eventObserver) {
+    constructor(viewController, eventBroker) {
         this.viewController = viewController;
-        this.eventObserver = eventObserver;
+        this.eventBroker = eventBroker;
         this.map = null;
         this.currentFeatureLayer = null;
         this.drawnItems = null;
@@ -20,10 +20,11 @@ class GoogleMapView {
     }
 
     attachEventListeners() {
-        this.eventObserver.subscribe(this.onShowLayers.bind(this), EventType.SHOW_ALL_LAYERS);
-        this.eventObserver.subscribe(this.onSaveLayer.bind(this), EventType.BEFORE_SAVE_LAYER);
-        this.eventObserver.subscribe(this.onLayerSaved.bind(this), EventType.LAYER_SAVED);
-        this.eventObserver.subscribe(this.afterLayersLoaded.bind(this), EventType.AFTER_SHOW_ALL_LAYERS);
+        this.eventBroker.subscribe(this.onLayersLoaded.bind(this), EventType.LAYERS_LOADED);
+        this.eventBroker.subscribe(this.onSaveLayer.bind(this), EventType.BEFORE_SAVE_LAYER);
+        this.eventBroker.subscribe(this.onLayerSaved.bind(this), EventType.LAYER_SAVED);
+        this.eventBroker.subscribe(this.afterLayersLoaded.bind(this), EventType.AFTER_LAYERS_SHOWN);
+        this.eventBroker.subscribe(this.onSelectLayer.bind(this), EventType.SELECT_LAYER);
 
         return this;
     }
@@ -51,9 +52,13 @@ class GoogleMapView {
                             context.handleLayerClick(event.feature);
                             context.handleDeleteVertex(event);
                         });
+                        this.map.data.setStyle({
+                            fillColor: 'red',
+                            strokeWeight: 1
+                        });
 
                         this.infowindow = new google.maps.InfoWindow();
-                        this.eventObserver.broadcast(EventType.MAP_LOADED, {});
+                        this.eventBroker.broadcast(EventType.MAP_LOADED, {});
                     });
                 }
             } catch (e) {
@@ -69,6 +74,11 @@ class GoogleMapView {
             drawingControlOptions: {
                 position: google.maps.ControlPosition.TOP_RIGHT,
                 drawingModes: ['polygon']
+            },
+            polygonOptions: {
+                fillColor: 'red',
+                //fillOpacity: 1,
+                strokeWeight: 1
             }
         });
         drawingManager.setMap(this.map);
@@ -90,13 +100,13 @@ class GoogleMapView {
         });
     }
 
-    onShowLayers(layerModelList) {
+    onLayersLoaded(layerModelList) {
         layerModelList.forEach(layerModel => {
             this.featureLayerModels.push(layerModel);
             var layerGeojson = JSON.parse(layerModel.Geojson);
             this.map.data.addGeoJson(layerGeojson, { idPropertyName: "Id" });
         });
-        this.eventObserver.broadcast(EventType.AFTER_SHOW_ALL_LAYERS, {});
+        this.eventBroker.broadcast(EventType.AFTER_LAYERS_SHOWN, {});
     }
 
     afterLayersLoaded() {
@@ -124,7 +134,7 @@ class GoogleMapView {
         this.infowindow.setPosition(position);
         this.infowindow.open(this.map);
 
-        this.eventObserver.broadcast(EventType.CLICK_LAYER, { LayerName: layerModel.LayerName });
+        this.eventBroker.broadcast(EventType.CLICK_LAYER, { LayerName: layerModel.LayerName });
     }
 
     onSaveLayer(nameContainer) {
@@ -134,7 +144,7 @@ class GoogleMapView {
             var targetFeatureLayerModel = this.featureLayerModels.find(x => x.Id == id);
             targetFeatureLayerModel.Geojson = json;
             var model = new GeoLayerModel(id, nameContainer.LayerName, targetFeatureLayerModel.Geojson);
-            this.eventObserver.broadcast(EventType.SAVE_LAYER, model);
+            this.eventBroker.broadcast(EventType.SAVE_LAYER, model);
         });
     }
 
@@ -157,17 +167,31 @@ class GoogleMapView {
         return bounds.getCenter();
     }
 
-    handleDeleteVertex(ev) {        
-            var newPolyPoints = [];
-            ev.feature.getGeometry().forEachLatLng(function (latlng) {
-                if (latlng.lat() == ev.latLng.lat() && latlng.lng() == ev.latLng.lng()) {
-                } else {
-                    newPolyPoints.push(latlng);
-                }
-            });
+    handleDeleteVertex(ev) {
+        if (!ev.latLng) return;
+        var newPolyPoints = [];
+        ev.feature.getGeometry().forEachLatLng(function (latlng) {
+            if (latlng.lat() == ev.latLng.lat() && latlng.lng() == ev.latLng.lng()) {
+            } else {
+                newPolyPoints.push(latlng);
+            }
+        });
 
-            var newLinearRing = new google.maps.Data.LinearRing(newPolyPoints);
-            var newPoly = new google.maps.Data.Polygon([newLinearRing]);
-            ev.feature.setGeometry(newPoly);
+        var newLinearRing = new google.maps.Data.LinearRing(newPolyPoints);
+        var newPoly = new google.maps.Data.Polygon([newLinearRing]);
+        ev.feature.setGeometry(newPoly);
+    }
+
+    onSelectLayer(layerModel) {
+        var context = this.map;
+        context.data.forEach(feature => {
+            var id = feature.getProperty("Id");
+            if (id == layerModel.Id) {
+                google.maps.event.trigger(context.data, 'click', { feature: feature });
+                var polyCoords = feature.getGeometry().getAt(0).getArray();
+                var position = this.calcCentroid(polyCoords);
+                context.panTo(position);
+            }
+        });
     }
 }

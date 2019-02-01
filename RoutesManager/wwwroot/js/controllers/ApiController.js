@@ -33,7 +33,7 @@
                 areas.forEach(areaLayer => {
                     areaLayerList.push(new GeoLayerModel(areaLayer.Id, areaLayer.LayerName, areaLayer.Geojson));
                 });
-                this.eventObserver.broadcast(EventType.SHOW_ALL_LAYERS, areaLayerList);
+                this.eventObserver.broadcast(EventType.LAYERS_LOADED, areaLayerList);
             })
             .catch(err => this.handleApiError(err));
     }

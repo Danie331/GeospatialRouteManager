@@ -13,8 +13,6 @@
         app.createMenu();
     });
 
-    app.createMenu = function () {
-        $(".slide-menu").slidemenu();
-    };
+    app.createMenu = () => $(".slide-menu").slidemenu();
 
 })(app);

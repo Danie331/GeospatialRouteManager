@@ -20,20 +20,19 @@
     <!-- componentize this -->
     <div class="slide-menu left-side">
         <ul class="menu-items">
-            <li class="menu-item open" title="My Areas">
+            <li class="menu-item open" title="My Layers">
                 <div class="menu-header">
                     <div class="menu-icon">
                         <i class="fas fa-draw-polygon"></i>
                     </div>
                     <div class="menu-content">
-                        <span>My Areas</span>
+                        <span>My Layers</span>
                     </div>
                     <div class="menu-close">
                         <i class="fa fa-times"></i>
                     </div>
                 </div>
-                <div class="menu-body">
-                    <h1>[Features coming soon...]</h1>
+                <div id="layersMenu" class="menu-body">                    
                 </div>
             </li>
             <li class="menu-item" title="Settings">
@@ -60,6 +59,7 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
             crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
     <script src="lib/slidermenu/dist/js/jquery.slidemenu.js"></script>
 
     <!--<script src="/lib/leaflet/leaflet.js"></script>-->
@@ -80,6 +80,7 @@
 
     <!-- core scripts -->
     <script src="js/EventBroker.js"></script>
+    <script src="js/views/GeoLayersMenuView.js"></script>
     <script src="js/views/SettingsMenuView.js"></script>
     <script src="js/controllers/ApiController.js"></script>
     <script src="js/controllers/MenuViewController.js"></script>

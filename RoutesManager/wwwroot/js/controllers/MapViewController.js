@@ -33,6 +33,7 @@ class MapViewController {
         this.eventBroker.subscribe(this.onGeoLayerSaved.bind(this), EventType.LAYER_SAVED);
         this.eventBroker.subscribe(this.onLayerClick.bind(this), EventType.CLICK_LAYER);
         this.eventBroker.subscribe(this.onSettingsLoaded.bind(this), EventType.SETTINGS_LOADED);
+        this.eventBroker.subscribe(this.onMapLoaded.bind(this), EventType.AFTER_LAYERS_SHOWN);
     }
 
     saveGeoLayerClickHandler() {
@@ -46,11 +47,13 @@ class MapViewController {
     }
 
     onGeoLayerSaving() {
+        $.blockUI({ message: "<h2 class='loading-text'>Saving...</h2>" });
         $(".saveGeoLayerButton").val('Saving...').attr("disabled", "disabled");
     }
 
     onGeoLayerSaved() {
         $(".saveGeoLayerButton").val('Save').removeAttr("disabled");
+        $.unblockUI();
     }
 
     onLayerClick(layerModel) {
@@ -66,5 +69,9 @@ class MapViewController {
                         <input class='saveGeoLayerButton' type='button' value='Save' />
                     </span>
                 </div>`;
+    }
+
+    onMapLoaded() {
+        $.unblockUI();
     }
 }

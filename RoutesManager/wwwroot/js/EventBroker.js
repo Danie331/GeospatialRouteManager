@@ -5,13 +5,14 @@ const EventType = {
     SAVE_LAYER: 'SAVE_LAYER',
     LAYER_SAVED: 'LAYER_SAVED',
     CLICK_LAYER: 'CLICK_LAYER',
+    SELECT_LAYER: 'SELECT_LAYER', 
 
     // map events
     MAP_LOADED: 'MAP_LOADED',
 
     // menu events
-    SHOW_ALL_LAYERS: 'SHOW_ALL_LAYERS',
-    AFTER_SHOW_ALL_LAYERS: 'AFTER_SHOW_ALL_LAYERS', 
+    LAYERS_LOADED: 'LAYERS_LOADED',
+    AFTER_LAYERS_SHOWN: 'AFTER_LAYERS_SHOWN', 
 
     // settings
     BEFORE_SAVE_SETTINGS: 'BEFORE_SAVE_SETTINGS',
@@ -28,11 +29,12 @@ class EventBroker {
             SAVE_LAYER: [],
             LAYER_SAVED: [],
             CLICK_LAYER: [],
+            SELECT_LAYER: [],
 
             MAP_LOADED: [],
 
-            SHOW_ALL_LAYERS: [],
-            AFTER_SHOW_ALL_LAYERS: [],
+            LAYERS_LOADED: [],
+            AFTER_LAYERS_SHOWN: [],
 
             BEFORE_SAVE_SETTINGS: [],
             SAVE_SETTINGS: [],
