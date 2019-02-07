@@ -1,6 +1,6 @@
 ﻿class ApiController {
     constructor(eventObserver) {
-        this.apiBaseUrl = 'http://localhost:8000/api'//'https://apiroutesmanager.azurewebsites.net/api'; 
+        this.apiBaseUrl = 'http://localhost:8000/api';//'https://apiroutesmanager.azurewebsites.net/api'; 
         this.eventObserver = eventObserver;
 
         this.init();
@@ -31,7 +31,7 @@
             .then(areas => {
                 var areaLayerList = [];
                 areas.forEach(areaLayer => {
-                    areaLayerList.push(new GeoLayerModel(areaLayer.Id, areaLayer.LayerName, areaLayer.Geojson));
+                    areaLayerList.push(new GeoLayerModel(areaLayer.Id, areaLayer.LayerName, areaLayer.Level, areaLayer.Geojson));
                 });
                 this.eventObserver.broadcast(EventType.LAYERS_LOADED, areaLayerList);
             })
@@ -48,7 +48,7 @@
                 return response.json();
             })
             .then(res => {
-                this.eventObserver.broadcast(EventType.LAYER_SAVED, new GeoLayerModel(res.Id, res.LayerName, res.Geojson));
+                this.eventObserver.broadcast(EventType.LAYER_SAVED, new GeoLayerModel(res.Id, res.LayerName, res.Level, res.Geojson));
             })
             .catch(err => this.handleApiError(err));
     }

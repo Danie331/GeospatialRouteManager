@@ -9,6 +9,8 @@ namespace Api.ApiDto
         public int Id { get; set; }
         [JsonProperty("LayerName")]
         public string LayerName { get; set; }
+        [JsonProperty("Level")]
+        public int Level { get; set; }
         [JsonProperty("Geojson")]
         public object Geojson { get; set; }
     }

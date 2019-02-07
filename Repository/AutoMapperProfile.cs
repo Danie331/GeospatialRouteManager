@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Linq;
+using System;
 
 namespace Repository
 {
@@ -32,7 +33,11 @@ namespace Repository
                 var geom = wktReader.Read(source.GeoLayer.AsText());              
                 var sb = new StringBuilder();
                 var serializer = NetTopologySuite.IO.GeoJsonSerializer.Create();
-                var feature = new Feature(geom, new AttributesTable(new[] { new KeyValuePair<string, object>("Id", source.Id) }));
+                var feature = new Feature(geom, new AttributesTable(new[] 
+                {
+                    new KeyValuePair<string, object>("Id", source.Id),
+                    new KeyValuePair<string, object>("LayerColour", GetLayerColour(source.Level))
+                }));
                 serializer.Formatting = Newtonsoft.Json.Formatting.Indented;
                 using (var sw = new StringWriter(sb))
                     serializer.Serialize(sw, feature);
@@ -41,8 +46,20 @@ namespace Repository
                 {
                     Id = source.Id,
                     LayerName = source.AreaName,
+                    Level = source.Level,
                     Geojson = sb.ToString()
                 };
+            }
+
+            private string GetLayerColour(int level)
+            {
+                switch (level)
+                {
+                    case 1: return "#FF333C";
+                    case 2: return "#F6FF33";
+                    case 3: return "#4FFF33";
+                }
+                return "red";
             }
         }
 
@@ -65,6 +82,7 @@ namespace Repository
                 return new SpatialArea
                 {
                     AreaName = source.LayerName,
+                    Level = source.Level,
                     Id = source.Id,
                     GeoLayer = feature.Geometry
                 };

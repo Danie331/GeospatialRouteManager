@@ -52,9 +52,13 @@ class GoogleMapView {
                             context.handleLayerClick(event.feature);
                             context.handleDeleteVertex(event);
                         });
-                        this.map.data.setStyle({
-                            fillColor: 'red',
-                            strokeWeight: 1
+                        this.map.data.setStyle(feature => {
+                            var colour = feature.getProperty("LayerColour");
+                            return {
+                                fillColor: colour,
+                                fillOpacity: 0.7,
+                                strokeWeight: 1
+                            }
                         });
 
                         this.infowindow = new google.maps.InfoWindow();
@@ -91,7 +95,7 @@ class GoogleMapView {
                 properties: { Id: 0 },
                 geometry: wktPoly.toJson()
             });
-            var layerModel = new GeoLayerModel(0, '', geoJson);
+            var layerModel = new GeoLayerModel(0, '', 0, geoJson);
             context.featureLayerModels.push(layerModel);
             var layerGeojson = JSON.parse(layerModel.Geojson);
             context.map.data.addGeoJson(layerGeojson, { idPropertyName: "Id" });
@@ -125,7 +129,7 @@ class GoogleMapView {
         this.map.data.overrideStyle(this.currentFeatureLayer, { editable: true });
         var id = this.currentFeatureLayer.getProperty("Id");
         var targetFeatureLayerModel = this.featureLayerModels.find(x => x.Id == id);
-        var layerModel = new GeoLayerModel(targetFeatureLayerModel.Id, targetFeatureLayerModel.LayerName, '');
+        var layerModel = new GeoLayerModel(targetFeatureLayerModel.Id, targetFeatureLayerModel.LayerName, targetFeatureLayerModel.Level, '');
 
         var content = this.viewController.getGeoLayerPopupContent(layerModel);
         var polyCoords = feature.getGeometry().getAt(0).getArray();
@@ -137,13 +141,13 @@ class GoogleMapView {
         this.eventBroker.broadcast(EventType.CLICK_LAYER, { LayerName: layerModel.LayerName });
     }
 
-    onSaveLayer(nameContainer) {
+    onSaveLayer(layerModel) {
         this.currentFeatureLayer.toGeoJson(p => {
             var json = JSON.stringify(p);
             var id = this.currentFeatureLayer.getProperty("Id");
             var targetFeatureLayerModel = this.featureLayerModels.find(x => x.Id == id);
             targetFeatureLayerModel.Geojson = json;
-            var model = new GeoLayerModel(id, nameContainer.LayerName, targetFeatureLayerModel.Geojson);
+            var model = new GeoLayerModel(id, layerModel.LayerName, layerModel.Level, targetFeatureLayerModel.Geojson);
             this.eventBroker.broadcast(EventType.SAVE_LAYER, model);
         });
     }
@@ -153,9 +157,14 @@ class GoogleMapView {
         if (!targetFeatureLayerModel) {
             targetFeatureLayerModel = this.featureLayerModels.find(x => x.Id == 0); // new layer
         }
+        var layerGeoJson = JSON.parse(model.Geojson);
         this.currentFeatureLayer.setProperty("Id", model.Id);
+        var colour = layerGeoJson.properties.LayerColour;
+        this.map.data.overrideStyle(this.currentFeatureLayer, { fillColor: colour, fillOpacity: 0.7, strokeWeight: 1 });
+
         targetFeatureLayerModel.Id = model.Id;
         targetFeatureLayerModel.LayerName = model.LayerName;
+        targetFeatureLayerModel.Level = model.Level;
     }
 
     calcCentroid(polyPoints) {

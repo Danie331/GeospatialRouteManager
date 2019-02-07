@@ -1,8 +1,9 @@
 ﻿
 class GeoLayerModel {
-    constructor(id, name, geojson) {
+    constructor(id, name, level, geojson) {
         this.Id = id;
         this.LayerName = name;
+        this.Level = level;
         this.Geojson = geojson;
     }
 

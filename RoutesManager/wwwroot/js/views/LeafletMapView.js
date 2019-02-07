@@ -87,14 +87,18 @@ class LeafletMapView {
         return this;
     }
 
-    onSaveLayer(layerNameContainer) {
-        var layerModel = new GeoLayerModel(this.activeLayer.myLayerId, layerNameContainer.LayerName, this.activeLayer.toGeoJSON());
+    onSaveLayer(layerData) {
+        var layerModel = new GeoLayerModel(this.activeLayer.myLayerId, layerData.LayerName, layerData.Level, this.activeLayer.toGeoJSON());
         this.eventBroker.broadcast(EventType.SAVE_LAYER, layerModel);
     }
 
     onLayerSaved(geoLayerModel) {
         this.activeLayer.myLayerId = geoLayerModel.Id;
         this.activeLayer.myLayerName = geoLayerModel.LayerName;
+        this.activeLayer.myLayerLevel = geoLayerModel.Level;
+        var geoJson = JSON.parse(geoLayerModel.Geojson);
+        this.activeLayer.setStyle({ color: geoJson.properties.LayerColour, weight: 1, fillOpacity: 0.7 });
+        //this.activeLayer.redraw();
     }
 
     handleLayerClick(layer) {
@@ -103,7 +107,7 @@ class LeafletMapView {
         }
         this.activeLayer = layer;
         this.activeLayer.editing.enable();
-        var layerModel = new GeoLayerModel(layer.myLayerId, layer.myLayerName, /*layer.toGeoJSON()*/'');
+        var layerModel = new GeoLayerModel(layer.myLayerId, layer.myLayerName, layer.myLayerLevel, /*layer.toGeoJSON()*/'');
         this.activeLayer.bindPopup(this.viewController.getGeoLayerPopupContent(layerModel)).openPopup();
         this.eventBroker.broadcast(EventType.CLICK_LAYER, layerModel);
     }
@@ -113,15 +117,17 @@ class LeafletMapView {
         layerModelList.forEach(layerModel => {
             L.geoJson(JSON.parse(layerModel.Geojson), {
                 onEachFeature: function (feature, layer) {
-                    layer.setStyle({ color: 'red', weight: 1 });
-                     layer.myLayerId = layerModel.Id;
-                     layer.myLayerName = layerModel.LayerName;
+                    var colour = feature.properties.LayerColour;
+                    layer.setStyle({ color: colour, weight: 1, fillOpacity: 0.7 });
+                    layer.myLayerId = layerModel.Id;
+                    layer.myLayerName = layerModel.LayerName;
+                    layer.myLayerLevel = layerModel.Level;
 
-                     layer.on('click', () => parent.handleLayerClick(layer));
+                    layer.on('click', () => parent.handleLayerClick(layer));
                     parent.drawnItems.addLayer(layer);
                 }
-            });            
-        });   
+            });
+        });
         this.eventBroker.broadcast(EventType.AFTER_LAYERS_SHOWN, {});
     }
 

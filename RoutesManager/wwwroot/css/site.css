@@ -41,6 +41,34 @@ input[type=button] {
 }
 
 .loading-text {
-    font-family: Verdana;
-    font-style: oblique;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 23px;
+    letter-spacing: 0.4px;
+    word-spacing: 2px;
+    color: #336DFF;
+    font-weight: 700;
+    text-decoration: none;
+    font-style: italic;
+    font-variant: normal;
+    text-transform: none;
+}
+
+.layerLink {    
+    text-decoration: none;
+}
+
+    .layerLink:hover {
+        text-decoration: underline;
+    }
+
+.info-window-item-row {
+    padding-bottom: 7px;
+}
+
+.layerLevelSelect {
+    width: 50px;
+}
+
+.layerNameInput {
+    width: 200px;
 }

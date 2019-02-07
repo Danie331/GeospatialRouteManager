@@ -29,6 +29,7 @@ namespace Repository.Core
                 if (targetLayer != null)
                 {
                     targetLayer.AreaName = dataDto.AreaName;
+                    targetLayer.Level = dataDto.Level;
                     targetLayer.GeoLayer = dataDto.GeoLayer;
                 }
             }

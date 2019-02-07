@@ -10,6 +10,8 @@ namespace Repository.DataModels
 
         public string AreaName { get; set; }
 
+        public int Level { get; set; }
+
         [Column(TypeName = "geography")]
         public IGeometry GeoLayer { get; set; }
     }

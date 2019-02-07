@@ -1,7 +1,7 @@
 ﻿
 class MapViewController {
     constructor(eventBroker) {       
-        this.$container1 = $("#map");
+        this.$container = $("#map");
         this.eventBroker = eventBroker;
         this.mapProvider = null;
 
@@ -25,7 +25,7 @@ class MapViewController {
     }
 
     attachHandlers() {
-        this.$container1.on('click', '.saveGeoLayerButton', {}, this.saveGeoLayerClickHandler.bind(this));
+        this.$container.on('click', '.saveGeoLayerButton', {}, this.saveGeoLayerClickHandler.bind(this));
     }
 
     attachEventListeners() {
@@ -42,8 +42,10 @@ class MapViewController {
             layerNameInput.focus();
             return;
         }
+        var layerLevel = $(".layerLevelSelect").val();
 
-        this.eventBroker.broadcast(EventType.BEFORE_SAVE_LAYER, { LayerName: layerNameInput.val() });
+        var layerModel = new GeoLayerModel(0, layerNameInput.val(), layerLevel, '');
+        this.eventBroker.broadcast(EventType.BEFORE_SAVE_LAYER, layerModel);
     }
 
     onGeoLayerSaving() {
@@ -60,11 +62,27 @@ class MapViewController {
         $('.layerNameInput').focus().val(layerModel.LayerName ? layerModel.LayerName : '');
     }
 
+    renderLayerLevelSetting(geoLayer) {
+        var levelSetting = "<select class='layerLevelSelect'>";
+        [{ Id: 1, Name: '1' }, { Id: 2, Name: '2' }, { Id: 3, Name: '3' }].forEach(level => {
+            var selected = level.Id == geoLayer.Level ? 'selected' : '';
+            var option = `<option value='${level.Id}' ${selected}>${level.Name}</option>`;
+            levelSetting += option;
+        });
+        return levelSetting + '</select>';
+    }
+
     getGeoLayerPopupContent(geoLayer) {
         return `<div>
                     <span>
-                        <label>Layer name: </label>
-                        <input class='layerNameInput' type='text' size=20 value='${geoLayer.LayerName ? geoLayer.LayerName : ''}' />
+                        <div class='info-window-item-row'>
+                            <label>Layer name: </label>
+                            <input class='layerNameInput' type='text' value='${geoLayer.LayerName ? geoLayer.LayerName : ''}' />
+                        </div>
+                        <div class='info-window-item-row'>
+                            <label>Priority level: </label>
+                            ${this.renderLayerLevelSetting(geoLayer)}
+                        </div>
                         <p />
                         <input class='saveGeoLayerButton' type='button' value='Save' />
                     </span>

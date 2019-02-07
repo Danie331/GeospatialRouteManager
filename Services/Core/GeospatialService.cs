@@ -4,6 +4,7 @@ using Repository.Contract;
 using Services.Contract;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Services.Core
 {
@@ -24,7 +25,7 @@ namespace Services.Core
         public async Task<List<GeoSpatialLayer>> GetMyAreasAsync()
         {
             var areas = await _geospatialRepository.GetMyAreasAsync();
-            return areas;
+            return areas.OrderBy(a => a.LayerName).ToList();
         }
     }
 }
