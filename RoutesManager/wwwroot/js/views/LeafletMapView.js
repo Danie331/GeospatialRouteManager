@@ -6,6 +6,7 @@ class LeafletMapView {
         this.map = null;
         this.activeLayer = null;
         this.drawnItems = null;
+        this.layersCache = null;
 
         this.init();
     }
@@ -51,6 +52,7 @@ class LeafletMapView {
         this.eventBroker.subscribe(this.onLayerSaved.bind(this), EventType.LAYER_SAVED);
         this.eventBroker.subscribe(this.onLayersLoaded.bind(this), EventType.LAYERS_LOADED);
         this.eventBroker.subscribe(this.onSelectLayer.bind(this), EventType.SELECT_LAYER);
+        this.eventBroker.subscribe(this.toggleLayers.bind(this), EventType.TOGGLE_LAYERS);
 
         return this;
     }
@@ -76,11 +78,18 @@ class LeafletMapView {
             }
         });
         this.map.addControl(drawControl);
-        var parent = this;
+        var context = this;
         this.map.on(L.Draw.Event.CREATED, function (e) {
-            parent.drawnItems.addLayer(e.layer);
+            var layer = e.layer, feature = layer.feature = layer.feature || {};
+            feature.type = feature.type || "Feature"; 
+            feature.properties = feature.properties || {};
+            feature.properties.Id = 0;
+
+            var layerModel = new GeoLayerModel(0, '', 0, '');
+            context.layersCache.push(layerModel);
+            context.drawnItems.addLayer(e.layer);
             e.layer.on('click', () => {
-                parent.handleLayerClick(e.layer);
+                context.handleLayerClick(e.layer);
             }).fireEvent('click');
         });
 
@@ -88,41 +97,87 @@ class LeafletMapView {
     }
 
     onSaveLayer(layerData) {
-        var layerModel = new GeoLayerModel(this.activeLayer.myLayerId, layerData.LayerName, layerData.Level, this.activeLayer.toGeoJSON());
-        this.eventBroker.broadcast(EventType.SAVE_LAYER, layerModel);
+        var geojson = this.activeLayer.toGeoJSON();
+        var id = geojson.properties.Id || 0;
+        this.eventBroker.broadcast(EventType.SAVE_LAYER, new GeoLayerModel(id, layerData.LayerName, layerData.Level, geojson));
     }
 
     onLayerSaved(geoLayerModel) {
-        this.activeLayer.myLayerId = geoLayerModel.Id;
-        this.activeLayer.myLayerName = geoLayerModel.LayerName;
-        this.activeLayer.myLayerLevel = geoLayerModel.Level;
-        var geoJson = JSON.parse(geoLayerModel.Geojson);
-        this.activeLayer.setStyle({ color: geoJson.properties.LayerColour, weight: 1, fillOpacity: 0.7 });
-        //this.activeLayer.redraw();
+        var targetLayer = this.layersCache.find(x => x.Id == geoLayerModel.Id);
+        if (!targetLayer) {
+            targetLayer = this.layersCache.find(x => x.Id == 0); // new layer
+        }
+
+        this.activeLayer.feature.properties.Id = geoLayerModel.Id;
+        this.activeLayer.setStyle({ color: JSON.parse(geoLayerModel.Geojson).properties.LayerColour, weight: 1, fillOpacity: 0.7 });
+
+        targetLayer.Id = geoLayerModel.Id;
+        targetLayer.LayerName = geoLayerModel.LayerName;
+        targetLayer.Level = geoLayerModel.Level;
+        targetLayer.Geojson = geoLayerModel.Geojson;
+    }
+
+    toggleLayers(selectedLevels) {
+        this.unselectActiveLayer();
+        var context = this;
+        this.map.eachLayer(function (layer) {
+            if (typeof layer.toGeoJSON === 'undefined')
+                return;
+            var geojson = layer.toGeoJSON();
+            if (_.has(geojson, 'properties')) {
+                context.map.removeLayer(layer);
+            }
+        });
+
+        var filteredLayers = _.filter(this.layersCache, layer => {
+            return _.includes(selectedLevels, layer.Level);
+        });
+
+        filteredLayers.forEach(layerModel => {
+            L.geoJson(JSON.parse(layerModel.Geojson), {
+                onEachFeature: function (feature, layer) {
+                    var colour = feature.properties.LayerColour;
+                    layer.setStyle({ color: colour, weight: 1, fillOpacity: 0.7 });
+                    layer.on('click', () => context.handleLayerClick(layer));
+                    context.drawnItems.addLayer(layer);
+                }
+            });
+        });
+        this.eventBroker.broadcast(EventType.AFTER_LAYERS_SHOWN, {});
+    }
+
+    unselectActiveLayer() {
+        if (this.activeLayer) {
+            this.activeLayer.editing.disable();
+            var geojson = this.activeLayer.toGeoJSON();
+            if (geojson.properties.Id == 0) {
+                this.map.removeLayer(this.activeLayer);
+            }
+        }
     }
 
     handleLayerClick(layer) {
-        if (this.activeLayer) {
-            this.activeLayer.editing.disable();
-        }
+        this.unselectActiveLayer();
+
         this.activeLayer = layer;
         this.activeLayer.editing.enable();
-        var layerModel = new GeoLayerModel(layer.myLayerId, layer.myLayerName, layer.myLayerLevel, /*layer.toGeoJSON()*/'');
+        var geojson = this.activeLayer.toGeoJSON();
+        var layerModel = this.layersCache.find(x => x.Id == geojson.properties.Id);
+        if (!layerModel) {
+            layerModel = this.layersCache.find(x => x.Id == 0);
+        }
         this.activeLayer.bindPopup(this.viewController.getGeoLayerPopupContent(layerModel)).openPopup();
         this.eventBroker.broadcast(EventType.CLICK_LAYER, layerModel);
     }
 
     onLayersLoaded(layerModelList) {
+        this.layersCache = layerModelList;
         var parent = this;
-        layerModelList.forEach(layerModel => {
+        this.layersCache.forEach(layerModel => {
             L.geoJson(JSON.parse(layerModel.Geojson), {
                 onEachFeature: function (feature, layer) {
                     var colour = feature.properties.LayerColour;
                     layer.setStyle({ color: colour, weight: 1, fillOpacity: 0.7 });
-                    layer.myLayerId = layerModel.Id;
-                    layer.myLayerName = layerModel.LayerName;
-                    layer.myLayerLevel = layerModel.Level;
-
                     layer.on('click', () => parent.handleLayerClick(layer));
                     parent.drawnItems.addLayer(layer);
                 }
@@ -134,10 +189,15 @@ class LeafletMapView {
     onSelectLayer(layerModel) {
         var context = this.map;
         context.eachLayer(function (layer) {
-            if (layer.myLayerId == layerModel.Id) {
-                layer.fireEvent('click');
-                var popupXY = layer.getPopup().getLatLng();
-                context.panTo(popupXY);
+            if (typeof layer.toGeoJSON === 'undefined')
+                return;
+            var geojson = layer.toGeoJSON();
+            if (_.has(geojson, 'properties')) {
+                if (geojson.properties.Id == layerModel.Id) {
+                    layer.fireEvent('click');
+                    var popupXY = layer.getPopup().getLatLng();
+                    context.panTo(popupXY);
+                }
             }
         });
     }

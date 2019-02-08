@@ -4,10 +4,10 @@ class GoogleMapView {
         this.viewController = viewController;
         this.eventBroker = eventBroker;
         this.map = null;
-        this.currentFeatureLayer = null;
-        this.drawnItems = null;
-        this.featureLayerModels = [];
+        this.selectedLayer = null;
+        this.layerCache = null;
         this.infowindow = null;
+        this.addFeatureEventHandlerInstance = null;
 
         this.init();
     }
@@ -25,6 +25,7 @@ class GoogleMapView {
         this.eventBroker.subscribe(this.onLayerSaved.bind(this), EventType.LAYER_SAVED);
         this.eventBroker.subscribe(this.afterLayersLoaded.bind(this), EventType.AFTER_LAYERS_SHOWN);
         this.eventBroker.subscribe(this.onSelectLayer.bind(this), EventType.SELECT_LAYER);
+        this.eventBroker.subscribe(this.toggleLayers.bind(this), EventType.TOGGLE_LAYERS);
 
         return this;
     }
@@ -96,7 +97,7 @@ class GoogleMapView {
                 geometry: wktPoly.toJson()
             });
             var layerModel = new GeoLayerModel(0, '', 0, geoJson);
-            context.featureLayerModels.push(layerModel);
+            context.layerCache.push(layerModel);
             var layerGeojson = JSON.parse(layerModel.Geojson);
             context.map.data.addGeoJson(layerGeojson, { idPropertyName: "Id" });
             drawingManager.setDrawingMode(null);
@@ -105,8 +106,29 @@ class GoogleMapView {
     }
 
     onLayersLoaded(layerModelList) {
-        layerModelList.forEach(layerModel => {
-            this.featureLayerModels.push(layerModel);
+        this.layerCache = layerModelList;
+        this.layerCache.forEach(layerModel => {
+            var layerGeojson = JSON.parse(layerModel.Geojson);
+            this.map.data.addGeoJson(layerGeojson, { idPropertyName: "Id" });
+        });
+        this.eventBroker.broadcast(EventType.AFTER_LAYERS_SHOWN, {});
+    }
+
+    toggleLayers(selectedLevels) {
+        this.unselectActiveLayer();
+
+        this.map.data.forEach(feature => {
+            this.map.data.remove(feature);
+        });
+
+        // Remove the event handler listening for new features/layers.
+        this.addFeatureEventHandlerInstance.remove();
+        this.addFeatureEventHandlerInstance = null;
+
+        var filteredLayers = _.filter(this.layerCache, layer => {
+            return _.includes(selectedLevels, layer.Level);
+        });
+        filteredLayers.forEach(layerModel => {
             var layerGeojson = JSON.parse(layerModel.Geojson);
             this.map.data.addGeoJson(layerGeojson, { idPropertyName: "Id" });
         });
@@ -115,21 +137,26 @@ class GoogleMapView {
 
     afterLayersLoaded() {
         var context = this;
-        this.map.data.addListener('addfeature', e => { context.handleLayerClick(e.feature); });
+        this.addFeatureEventHandlerInstance = this.map.data.addListener('addfeature', e => { context.handleLayerClick(e.feature); });
+    }
+
+    unselectActiveLayer() {
+        this.infowindow.close();
+        if (this.selectedLayer) {
+            this.map.data.overrideStyle(this.selectedLayer, { editable: false });
+            if (this.selectedLayer.getProperty("Id") == 0) {
+                this.map.data.remove(this.selectedLayer);
+            }
+        }
     }
 
     handleLayerClick(feature) {
-        if (this.currentFeatureLayer) {
-            this.map.data.overrideStyle(this.currentFeatureLayer, { editable: false });
-            if (this.currentFeatureLayer.getProperty("Id") == 0) {
-                this.map.data.remove(this.currentFeatureLayer);
-            }
-        }
-        this.currentFeatureLayer = feature;
-        this.map.data.overrideStyle(this.currentFeatureLayer, { editable: true });
-        var id = this.currentFeatureLayer.getProperty("Id");
-        var targetFeatureLayerModel = this.featureLayerModels.find(x => x.Id == id);
-        var layerModel = new GeoLayerModel(targetFeatureLayerModel.Id, targetFeatureLayerModel.LayerName, targetFeatureLayerModel.Level, '');
+        this.unselectActiveLayer();
+        this.selectedLayer = feature;
+        this.map.data.overrideStyle(this.selectedLayer, { editable: true });
+        var id = this.selectedLayer.getProperty("Id");
+        var targetLayer = this.layerCache.find(x => x.Id == id);
+        var layerModel = new GeoLayerModel(targetLayer.Id, targetLayer.LayerName, targetLayer.Level, '');
 
         var content = this.viewController.getGeoLayerPopupContent(layerModel);
         var polyCoords = feature.getGeometry().getAt(0).getArray();
@@ -142,29 +169,30 @@ class GoogleMapView {
     }
 
     onSaveLayer(layerModel) {
-        this.currentFeatureLayer.toGeoJson(p => {
+        this.selectedLayer.toGeoJson(p => {
             var json = JSON.stringify(p);
-            var id = this.currentFeatureLayer.getProperty("Id");
-            var targetFeatureLayerModel = this.featureLayerModels.find(x => x.Id == id);
-            targetFeatureLayerModel.Geojson = json;
-            var model = new GeoLayerModel(id, layerModel.LayerName, layerModel.Level, targetFeatureLayerModel.Geojson);
+            var id = this.selectedLayer.getProperty("Id");
+            var targetLayer = this.layerCache.find(x => x.Id == id);
+            targetLayer.Geojson = json;
+            var model = new GeoLayerModel(id, layerModel.LayerName, layerModel.Level, targetLayer.Geojson);
             this.eventBroker.broadcast(EventType.SAVE_LAYER, model);
         });
     }
 
     onLayerSaved(model) {
-        var targetFeatureLayerModel = this.featureLayerModels.find(x => x.Id == model.Id);
-        if (!targetFeatureLayerModel) {
-            targetFeatureLayerModel = this.featureLayerModels.find(x => x.Id == 0); // new layer
+        var targetLayer = this.layerCache.find(x => x.Id == model.Id);
+        if (!targetLayer) {
+            targetLayer = this.layerCache.find(x => x.Id == 0); // new layer
         }
         var layerGeoJson = JSON.parse(model.Geojson);
-        this.currentFeatureLayer.setProperty("Id", model.Id);
+        this.selectedLayer.setProperty("Id", model.Id);
         var colour = layerGeoJson.properties.LayerColour;
-        this.map.data.overrideStyle(this.currentFeatureLayer, { fillColor: colour, fillOpacity: 0.7, strokeWeight: 1 });
+        this.map.data.overrideStyle(this.selectedLayer, { fillColor: colour, fillOpacity: 0.7, strokeWeight: 1 });
 
-        targetFeatureLayerModel.Id = model.Id;
-        targetFeatureLayerModel.LayerName = model.LayerName;
-        targetFeatureLayerModel.Level = model.Level;
+        targetLayer.Id = model.Id;
+        targetLayer.LayerName = model.LayerName;
+        targetLayer.Level = model.Level;
+        targetLayer.Geojson = model.Geojson;
     }
 
     calcCentroid(polyPoints) {

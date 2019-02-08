@@ -72,3 +72,12 @@ input[type=button] {
 .layerNameInput {
     width: 200px;
 }
+
+.align-middle {
+    vertical-align: middle;
+}
+
+.menu-content-vh {
+    overflow-y: auto;
+    height: 75vh;
+}

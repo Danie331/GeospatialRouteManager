@@ -105,7 +105,8 @@ Slide Menu
 }
 
 .menu-body {
-    width: 500px !important;    
+    width: 500px !important;   
+    overflow-y: hidden !important;
 }
 
 #menutoggle {

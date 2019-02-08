@@ -13,6 +13,7 @@ const EventType = {
     // menu events
     LAYERS_LOADED: 'LAYERS_LOADED',
     AFTER_LAYERS_SHOWN: 'AFTER_LAYERS_SHOWN', 
+    TOGGLE_LAYERS: 'TOGGLE_LAYERS',
 
     // settings
     BEFORE_SAVE_SETTINGS: 'BEFORE_SAVE_SETTINGS',
@@ -35,6 +36,7 @@ class EventBroker {
 
             LAYERS_LOADED: [],
             AFTER_LAYERS_SHOWN: [],
+            TOGGLE_LAYERS: [],
 
             BEFORE_SAVE_SETTINGS: [],
             SAVE_SETTINGS: [],
