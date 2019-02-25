@@ -8,5 +8,6 @@ namespace Services.Contract
     {
         Task<GeoSpatialLayer> SaveGeoLayerAsync(GeoSpatialLayer layer);
         Task<List<GeoSpatialLayer>> GetMyAreasAsync();
+        Task<GeoLocation> GetLocationAsync(GeoLocation location);
     }
 }

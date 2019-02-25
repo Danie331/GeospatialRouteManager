@@ -15,6 +15,7 @@
         this.eventObserver.subscribe(this.getMyAreas.bind(this), EventType.MAP_LOADED);
         this.eventObserver.subscribe(this.loadSettings.bind(this), EventType.LOAD_SETTINGS);
         this.eventObserver.subscribe(this.saveSettings.bind(this), EventType.SAVE_SETTINGS);
+        this.eventObserver.subscribe(this.findLocation.bind(this), EventType.FIND_LOCATION);
     }
 
     /////////////////////////////////////////////   API   //////////////////////////////////////////////////
@@ -78,6 +79,21 @@
             })
             .then(() => {
                 this.eventObserver.broadcast(EventType.SETTINGS_SAVED, {});
+            })
+            .catch(err => this.handleApiError(err));
+    }
+
+    findLocation(geoLocationModel) {
+        var endpoint = `${this.apiBaseUrl}/geospatial/findlocation`;
+        fetch(endpoint, this.createJsonPayload('POST', geoLocationModel))
+            .then(function (response) {
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                }
+                return response.json();
+            })
+            .then(res => {
+                this.eventObserver.broadcast(EventType.PLOT_LOCATION, new GeoLocationModel(res.LocationId, res.FormattedAddress, res.Lat, res.Lng, res.What3Words, null));
             })
             .catch(err => this.handleApiError(err));
     }

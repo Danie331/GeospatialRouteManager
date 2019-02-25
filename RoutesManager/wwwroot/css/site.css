@@ -65,11 +65,23 @@ input[type=button] {
     padding-bottom: 7px;
 }
 
-.layerLevelSelect {
-    width: 50px;
-}
+    .info-window-item-row > label {
+        padding-right: 20px;
+        width: 80px;
+        display: inline-block;
+    }
+
+    .info-window-item-row > input {
+        width: 280px;
+        display: inline-block;
+    }
+
+    .layerLevelSelect {
+        width: 50px;
+    }
 
 .layerNameInput {
+    display: inline-block;
     width: 200px;
 }
 
@@ -80,4 +92,14 @@ input[type=button] {
 .menu-content-vh {
     overflow-y: auto;
     height: 75vh;
+}
+
+.search-box {
+    width: 400px;
+    height: 20px;
+}
+
+.menu-search-logo {
+    height: 60px;
+    display: block;
 }

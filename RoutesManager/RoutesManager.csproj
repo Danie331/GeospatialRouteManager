@@ -27,6 +27,7 @@
     <Folder Include="wwwroot\lib\leaflet-icon-pulse\" />
     <Folder Include="wwwroot\lib\wicket\" />
     <Folder Include="wwwroot\lib\slidermenu\" />
+    <Folder Include="wwwroot\img\" />
   </ItemGroup>
 
   <ItemGroup>

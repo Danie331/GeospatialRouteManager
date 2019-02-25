@@ -1,11 +1,10 @@
-﻿using AutoMapper;
+﻿
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Repository.Contract;
 using Repository.Core;
 using Repository.DataContext;
-using System.Reflection;
 
 namespace Repository
 {

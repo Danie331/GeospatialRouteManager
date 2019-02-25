@@ -89,6 +89,27 @@ class MapViewController {
                 </div>`;
     }
 
+    getGeolocationPopupContent(geoLocation) {
+        return `<div>
+                    <span>
+                        <div class='info-window-item-row'>
+                            <label>Address: </label>
+                            <input class='layerNameInput' type='text' value='${geoLocation.FormattedAddress ? geoLocation.FormattedAddress : "n/a"}' readonly />
+                        </div>
+                        <div class='info-window-item-row'>
+                            <label>Lat/Lng: </label>
+                            <input type='text' value='${geoLocation.Lat}, ${geoLocation.Lng}' readonly />
+                        </div>
+                        <div class='info-window-item-row'>
+                            <label>What3Words: </label>
+                            <input type='text' value='${geoLocation.What3Words}' readonly />
+                        </div>
+                        <p />
+                        <input class='saveGeoLocationButton' type='button' value='Save Location' readonly />
+                    </span>
+                </div>`;
+    }
+
     onMapLoaded() {
         $.unblockUI();
     }

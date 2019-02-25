@@ -9,6 +9,8 @@ const EventType = {
 
     // map events
     MAP_LOADED: 'MAP_LOADED',
+    FIND_LOCATION: 'FIND_LOCATION',
+    PLOT_LOCATION: 'PLOT_LOCATION',
 
     // menu events
     LAYERS_LOADED: 'LAYERS_LOADED',
@@ -33,6 +35,8 @@ class EventBroker {
             SELECT_LAYER: [],
 
             MAP_LOADED: [],
+            FIND_LOCATION: [],
+            PLOT_LOCATION: [],
 
             LAYERS_LOADED: [],
             AFTER_LAYERS_SHOWN: [],

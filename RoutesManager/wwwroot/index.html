@@ -32,7 +32,22 @@
                         <i class="fa fa-times"></i>
                     </div>
                 </div>
-                <div id="layersMenu" class="menu-body">                    
+                <div id="layersMenu" class="menu-body">
+                </div>
+            </li>
+            <li class="menu-item">
+                <div class="menu-header">
+                    <div class="menu-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="menu-content">
+                        <span>Location Finder</span>
+                    </div>
+                    <div class="menu-close">
+                        <i class="fa fa-times"></i>
+                    </div>
+                </div>
+                <div id="locationFinderMenu" class="menu-body">
                 </div>
             </li>
             <li class="menu-item">
@@ -82,6 +97,7 @@
     <!-- core scripts -->
     <script src="js/EventBroker.js"></script>
     <script src="js/views/GeoLayersMenuView.js"></script>
+    <script src="js/views/LocationFinderMenuView.js"></script>
     <script src="js/views/SettingsMenuView.js"></script>
     <script src="js/controllers/ApiController.js"></script>
     <script src="js/controllers/MenuViewController.js"></script>
@@ -90,6 +106,7 @@
     <script src="js/views/GoogleMapView.js"></script>
     <script src="js/models/GeoLayerModel.js"></script>
     <script src="js/models/UserSettingsModel.js"></script>
+    <script src="js/models/GeoLocationModel.js"></script>
     <script src="js/App.js"></script>
 </body>
 </html>

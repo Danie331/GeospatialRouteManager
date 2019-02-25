@@ -26,13 +26,14 @@ class GoogleMapView {
         this.eventBroker.subscribe(this.afterLayersLoaded.bind(this), EventType.AFTER_LAYERS_SHOWN);
         this.eventBroker.subscribe(this.onSelectLayer.bind(this), EventType.SELECT_LAYER);
         this.eventBroker.subscribe(this.toggleLayers.bind(this), EventType.TOGGLE_LAYERS);
+        this.eventBroker.subscribe(this.plotLocationMarker.bind(this), EventType.PLOT_LOCATION);
 
         return this;
     }
 
     createMapScript() {
         var script = document.createElement('script');
-        script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDQ3eXd26fw0zaOG95D4u5vgki7asjfY4I&callback=initGoogleMap&libraries=drawing";
+        script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDQ3eXd26fw0zaOG95D4u5vgki7asjfY4I&callback=initGoogleMap&libraries=drawing,places";
         document.body.appendChild(script);
 
         return this;
@@ -230,5 +231,27 @@ class GoogleMapView {
                 context.panTo(position);
             }
         });
+    }
+
+    plotLocationMarker(geoLocationModel) {
+        $.unblockUI();
+   
+        var locationPos = new google.maps.LatLng(geoLocationModel.Lat, geoLocationModel.Lng);
+        var marker = new google.maps.Marker({
+            position: locationPos,
+            map: this.map
+        });
+
+        var content = this.viewController.getGeolocationPopupContent(geoLocationModel);
+        var context = this;
+        marker.addListener('click', function () {
+            context.infowindow.close();
+            context.infowindow.setContent(content);
+            context.infowindow.open(context.map, marker);
+        });
+
+        this.map.panTo(marker.getPosition());
+        this.infowindow.setContent(content);
+        this.infowindow.open(this.map, marker);
     }
 }

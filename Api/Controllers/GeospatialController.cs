@@ -5,6 +5,10 @@ using DomainModels.Geospatial;
 using Microsoft.AspNetCore.Mvc;
 using Services.Contract;
 
+// TODO:
+// 1. Add logging
+// 2. Add security
+// 3. Add bundling + minification
 namespace Api.Controllers
 {
     [Route("api/geospatial")]
@@ -35,6 +39,15 @@ namespace Api.Controllers
         {
             var result = await _geospatialService.GetMyAreasAsync();
             return _mapper.Map<List<ApiDto.GeoFeatureLayer>>(result);
+        }
+
+        [HttpPost]
+        [Route("findlocation")]
+        public async Task<ApiDto.GeoLocation> GetLocation(ApiDto.GeoLocation location)
+        {
+            var locationDto = _mapper.Map<GeoLocation>(location);
+            var result = await _geospatialService.GetLocationAsync(locationDto);
+            return _mapper.Map<ApiDto.GeoLocation>(result);
         }
     }
 }

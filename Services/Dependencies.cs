@@ -13,6 +13,7 @@ namespace Services
             services.AddScoped<IGeospatialService, GeospatialService>();
             services.AddScoped<IUserService, UserService>();
 
+            ExternalServices.Dependencies.RegisterExternalServices(services, configuration);
             Repository.Dependencies.RegisterRepository(services, configuration);
         }
     }
