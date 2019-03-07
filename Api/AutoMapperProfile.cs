@@ -6,7 +6,8 @@ namespace Api
     {
         public AutoMapperProfile()
         {
-            
+            CreateMap<DomainModels.Geospatial.SearchSuburb, ApiDto.SearchSuburb>();
+            CreateMap<DomainModels.Geospatial.SearchAddress, ApiDto.SearchAddress>();
         }
     }
 }

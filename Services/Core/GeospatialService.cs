@@ -37,6 +37,12 @@ namespace Services.Core
         public async Task<GeoLocation> GetLocationAsync(GeoLocation location)
         {
             // go to db first
+            if (location.LocationId > 0)
+            {
+                location = await _geospatialRepository.FindAddressByIdAsync(location.LocationId);
+                return location;
+            }
+
             try
             {
                 if (!string.IsNullOrEmpty(location.What3Words))
@@ -54,6 +60,37 @@ namespace Services.Core
             }
 
             return location;
+        }
+
+        public async Task<List<SearchSuburb>> GetMatchingSuburbsAsync(string searchText)
+        {
+            return await _geospatialRepository.FindSuburbsSimilarToAsync(searchText);
+        }
+
+        public async Task<List<SearchAddress>> GetMatchingAddressesAsync(string searchText, int suburbId)
+        {
+            var firstWord = searchText.IndexOf(" ") > -1 ? searchText.Substring(0, searchText.IndexOf(" ")) : searchText;
+            var hasStreetNumber = firstWord.Any(char.IsDigit);
+
+            if (hasStreetNumber)
+            {
+                // Search by street number
+                return await _geospatialRepository.FindAddressesWithStreetNumberAsync(searchText, suburbId);
+            }
+
+            if (searchText.Length >= 5)
+            {
+                // "Contains" search
+                return await _geospatialRepository.FindAddressesContainingStringAsync(searchText, suburbId);
+            }
+
+            // All other cases search from start of address
+            return await _geospatialRepository.FindAddressesStartingWithStringAsync(searchText, suburbId);
+        }
+
+        public async Task<List<SearchAddress>> GetMatchingSectionalTitlesAsync(string searchText, int suburbId)
+        {
+            return await _geospatialRepository.FindSectionalTitlesContainingStringAsync(searchText, suburbId);
         }
     }
 }

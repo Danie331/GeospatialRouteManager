@@ -9,7 +9,6 @@ const EventType = {
 
     // map events
     MAP_LOADED: 'MAP_LOADED',
-    FIND_LOCATION: 'FIND_LOCATION',
     PLOT_LOCATION: 'PLOT_LOCATION',
 
     // menu events
@@ -22,7 +21,16 @@ const EventType = {
     SAVE_SETTINGS: 'SAVE_SETTINGS',
     SETTINGS_SAVED: 'SETTINGS_SAVED',
     LOAD_SETTINGS: 'LOAD_SETTINGS',
-    SETTINGS_LOADED: 'SETTINGS_LOADED' 
+    SETTINGS_LOADED: 'SETTINGS_LOADED',
+
+    // search events
+    FIND_LOCATION: 'FIND_LOCATION',
+    SEARCH_SUBURBS: 'SEARCH_SUBURBS',
+    SUBURBS_RETRIEVED: 'SUBURBS_RETRIEVED',
+    SEARCH_ADDRESSES: 'SEARCH_ADDRESSES',
+    ADDRESSES_RETRIEVED: 'ADDRESSES_RETRIEVED',
+    SEARCH_SECTIONAL_TITLES: 'SEARCH_SECTIONAL_TITLES',
+    SECTIONAL_TITLES_RETRIEVED: 'SECTIONAL_TITLES_RETRIEVED'
 }
 
 class EventBroker {
@@ -34,8 +42,7 @@ class EventBroker {
             CLICK_LAYER: [],
             SELECT_LAYER: [],
 
-            MAP_LOADED: [],
-            FIND_LOCATION: [],
+            MAP_LOADED: [],            
             PLOT_LOCATION: [],
 
             LAYERS_LOADED: [],
@@ -46,7 +53,15 @@ class EventBroker {
             SAVE_SETTINGS: [],
             SETTINGS_SAVED: [],
             LOAD_SETTINGS: [],
-            SETTINGS_LOADED: []
+            SETTINGS_LOADED: [],
+
+            FIND_LOCATION: [],
+            SEARCH_SUBURBS: [],
+            SUBURBS_RETRIEVED: [],
+            SEARCH_ADDRESSES: [],
+            ADDRESSES_RETRIEVED: [],
+            SEARCH_SECTIONAL_TITLES: [],
+            SECTIONAL_TITLES_RETRIEVED: []
         };
     }
 

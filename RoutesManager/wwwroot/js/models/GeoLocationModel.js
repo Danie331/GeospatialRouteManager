@@ -1,7 +1,7 @@
 ﻿
 class GeoLocationModel {
     constructor(id, formattedAddress, lat, lng, w3w, providerPayload) {
-        this.Id = id;
+        this.LocationId = id;
         this.FormattedAddress = formattedAddress;
         this.Lat = lat;
         this.Lng = lng;

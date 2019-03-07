@@ -49,5 +49,29 @@ namespace Api.Controllers
             var result = await _geospatialService.GetLocationAsync(locationDto);
             return _mapper.Map<ApiDto.GeoLocation>(result);
         }
+
+        [HttpGet]
+        [Route("findmatchingsuburbs")]
+        public async Task<List<ApiDto.SearchSuburb>> GetMatchingSuburbs([FromQuery] string searchText)
+        {
+            var results = await _geospatialService.GetMatchingSuburbsAsync(searchText);
+            return _mapper.Map<List<ApiDto.SearchSuburb>>(results);
+        }
+
+        [HttpGet]
+        [Route("findmatchingaddresses")]
+        public async Task<List<ApiDto.SearchAddress>> GetMatchingAddresses([FromQuery] string searchText, [FromQuery] int suburbId)
+        {
+            var results = await _geospatialService.GetMatchingAddressesAsync(searchText, suburbId);
+            return _mapper.Map<List<ApiDto.SearchAddress>>(results);
+        }
+
+        [HttpGet]
+        [Route("findmatchingsectionaltitles")]
+        public async Task<List<ApiDto.SearchAddress>> GetMatchingSectionalTitles([FromQuery] string searchText, [FromQuery] int suburbId)
+        {
+            var results = await _geospatialService.GetMatchingSectionalTitlesAsync(searchText, suburbId);
+            return _mapper.Map<List<ApiDto.SearchAddress>>(results);
+        }
     }
 }

@@ -4,6 +4,9 @@ class LocationFinderMenuView {
         this.$container = $('#locationFinderMenu');
         this.eventBroker = eventBroker;
         this.settings = null;
+        this.suburbsAutocompleteCallback = null;
+        this.addressAutoCompleteCallback = null;
+        this.sectionalTitleAutoCompleteCallback = null;
 
         this.attachHandlers()
             .attachEventSubscribers();
@@ -11,6 +14,62 @@ class LocationFinderMenuView {
 
     render() {
         this.$container.append(this.content());
+        var context = this;
+        var selectedSuburbId = 0;
+        $("#localSuburbSearchTextField").autocomplete({
+            minLength: 3,
+            delay: 500,
+            source: function (request, responseCallback) {
+                var addressSearchModel = new AddressSearchModel(request.term, 0);
+                context.eventBroker.broadcast(EventType.SEARCH_SUBURBS, addressSearchModel);
+                context.suburbsAutocompleteCallback = responseCallback;
+            },
+            select: function (event, ui) {
+                event.preventDefault();
+                $(this).val(ui.item.label);
+                selectedSuburbId = ui.item.value;
+                $("#localAddressSearchTextField").val("").prop("disabled", false);
+                $("#localSectionalTitleSearchTextField").val("").prop("disabled", false);
+            },
+            change: function (event, ui) {
+                if (ui.item == null) {
+                    $("#localAddressSearchTextField").val("").prop("disabled", true);
+                    $("#localSectionalTitleSearchTextField").val("").prop("disabled", true);
+                }
+            }
+        });
+
+        $("#localAddressSearchTextField").autocomplete({
+            minLength: 3,
+            delay: 500,
+            source: function (request, responseCallback) {
+                var addressSearchModel = new AddressSearchModel(request.term, selectedSuburbId);
+                context.eventBroker.broadcast(EventType.SEARCH_ADDRESSES, addressSearchModel);
+                context.addressAutoCompleteCallback = responseCallback;
+            },
+            select: function (event, ui) {
+                event.preventDefault();
+                $(this).val(ui.item.label);
+                var geoLocationModel = new GeoLocationModel(ui.item.value, '', 0, 0, null, null);
+                context.eventBroker.broadcast(EventType.FIND_LOCATION, geoLocationModel);
+            }
+        });
+
+        $("#localSectionalTitleSearchTextField").autocomplete({
+            minLength: 3,
+            delay: 500,
+            source: function (request, responseCallback) {
+                var addressSearchModel = new AddressSearchModel(request.term, selectedSuburbId);
+                context.eventBroker.broadcast(EventType.SEARCH_SECTIONAL_TITLES, addressSearchModel);
+                context.sectionalTitleAutoCompleteCallback = responseCallback;
+            },
+            select: function (event, ui) {
+                event.preventDefault();
+                $(this).val(ui.item.label);
+                var geoLocationModel = new GeoLocationModel(ui.item.value, '', 0, 0, null, null);
+                context.eventBroker.broadcast(EventType.FIND_LOCATION, geoLocationModel);
+            }
+        });
 
         return this;
     }
@@ -23,14 +82,17 @@ class LocationFinderMenuView {
                     this.handleSearchW3W(words);
                 }
             } 
-        });
+        });       
 
         return this;
     }
 
     attachEventSubscribers() {
         this.eventBroker.subscribe(this.initSettings.bind(this), EventType.SETTINGS_LOADED);
-        this.eventBroker.subscribe(this.onMapLoaded.bind(this), EventType.MAP_LOADED)
+        this.eventBroker.subscribe(this.onMapLoaded.bind(this), EventType.MAP_LOADED);
+        this.eventBroker.subscribe(this.onSuburbsRetrieved.bind(this), EventType.SUBURBS_RETRIEVED);
+        this.eventBroker.subscribe(this.onAddressesRetrieved.bind(this), EventType.ADDRESSES_RETRIEVED);
+        this.eventBroker.subscribe(this.onSectionalTitlesRetrieved.bind(this), EventType.SECTIONAL_TITLES_RETRIEVED);
         
         return this;
     }
@@ -42,7 +104,7 @@ class LocationFinderMenuView {
     onMapLoaded() {
         if (this.settings.DefaultMapProvider === 'google') {
             this.render();
-            var autocomplete = new google.maps.places.Autocomplete(document.getElementById('searchTextField'),
+            var autocomplete = new google.maps.places.Autocomplete(document.getElementById('googleSearchTextField'),
                 { strictBounds: true, componentRestrictions: { country: 'za' } });
             autocomplete.setFields(['address_components', 'geometry', 'formatted_address', 'place_id']);
             autocomplete.addListener('place_changed', () => this.handleGoogleLocationSelect(autocomplete));
@@ -71,10 +133,36 @@ class LocationFinderMenuView {
         this.eventBroker.broadcast(EventType.FIND_LOCATION, new GeoLocationModel(0, null, 0, 0, words, null));
     }
 
+    onSuburbsRetrieved(suburbsList) {
+        this.suburbsAutocompleteCallback(suburbsList);
+    }
+
+    onAddressesRetrieved(addressesList) {
+        this.addressAutoCompleteCallback(addressesList);
+    }
+
+    onSectionalTitlesRetrieved(sectionalTitleList) {
+        this.sectionalTitleAutoCompleteCallback(sectionalTitleList);
+    }
+
     content() {
-        return `<div class='menu-margins'>
+        return `<div class='menu-margins'>                    
+                    <span class='menu-search-header underline'>Local Search</span>
+<div class='menu-label-input'>
+                    <label>Suburb: </label>
+                    <input id='localSuburbSearchTextField' type='search' class='inline-search-box' />
+                    </div>
+<div class='menu-label-input'>
+                    <label>Address: </label>
+                    <input id='localAddressSearchTextField' type='search' class='inline-search-box' disabled />
+                    </div>
+<div class='menu-label-input'>
+                    <label>SS Name: </label>
+                    <input id='localSectionalTitleSearchTextField' type='search' class='inline-search-box' disabled />
+                    </div>
+                    <p />
                     <img src='../../img/google_logo.jpg' class='menu-search-logo' />
-                    <input id='searchTextField' type='search' class='search-box' />
+                    <input id='googleSearchTextField' type='search' class='search-box' />
                     <p />
                     <img src='../../img/w3w_logo.png' class='menu-search-logo' />
                     <input id='w3wSearchField' type='search' class='search-box' placeholder='Enter.three.words ...' />

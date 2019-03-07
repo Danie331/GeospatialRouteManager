@@ -105,7 +105,7 @@ class MapViewController {
                             <input type='text' value='${geoLocation.What3Words}' readonly />
                         </div>
                         <p />
-                        <input class='saveGeoLocationButton' type='button' value='Save Location' readonly />
+                        ${geoLocation.LocationId ? "" : "<input class='saveGeoLocationButton' type='button' value='Save Location' readonly />"}
                     </span>
                 </div>`;
     }
