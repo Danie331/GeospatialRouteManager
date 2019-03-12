@@ -163,5 +163,8 @@ input[type=button] {
     }
 
 .ui-autocomplete {
-    z-index: 9999 !important;
+    z-index: 1000 !important;
+    max-height: 300px;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }

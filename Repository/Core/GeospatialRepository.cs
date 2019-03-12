@@ -6,6 +6,7 @@ using Repository.Contract;
 using DomainModels.Geospatial;
 using Microsoft.EntityFrameworkCore;
 using Repository.DataContext;
+using System.Linq;
 
 namespace Repository.Core
 {
@@ -52,56 +53,59 @@ namespace Repository.Core
 
         public async Task<List<SearchSuburb>> FindSuburbsSimilarToAsync(string searchText)
         {
-            return await Task.FromResult(new List<SearchSuburb>
-            {
-                 new SearchSuburb { SuburbId = 1, FormattedName = "Claremont Upper, Southern Suburbs, Cape Town" },
-                 new SearchSuburb { SuburbId = 2, FormattedName = "Claremont Mid, Southern Suburbs, Cape Town" },
-                 new SearchSuburb { SuburbId = 3, FormattedName = "Claremont, Randberg, Gauteng Province" }
-            });
+            var targetRecords = await _geospatialContext.Suburb.Where(s => s.LongName.ToLower().Contains(searchText.ToLower())).ToListAsync();
+            var matchingSuburbs = _mapper.Map<List<SearchSuburb>>(targetRecords);
+
+            return matchingSuburbs;
         }
 
         public async Task<List<SearchAddress>> FindAddressesWithStreetNumberAsync(string searchText, int suburbId)
         {
-            return await Task.FromResult(new List<SearchAddress>
-            {
-                new SearchAddress { AddressLocationId = 1, FormattedAddress ="123 Stringer Street, Claremont, Cape Town" },
-                new SearchAddress { AddressLocationId = 2, FormattedAddress ="1a Beta road, Somerset west, Cape Town" },
-                new SearchAddress { AddressLocationId = 3, FormattedAddress ="1b Beta Road, Somerset west, Cape Town" },
-            });
+            var targetRecords = await _geospatialContext.Address.Where(s => s.SuburbId == suburbId && s.FullAddress.StartsWith(searchText))
+                                                                .ToListAsync();
+            var matchingAddresses = _mapper.Map<List<SearchAddress>>(targetRecords);
+
+            return matchingAddresses;
         }
 
         public async Task<List<SearchAddress>> FindAddressesContainingStringAsync(string searchText, int suburbId)
         {
-            return await Task.FromResult(new List<SearchAddress>
-            {
-                new SearchAddress { AddressLocationId = 1, FormattedAddress ="123 Stringer Street, Claremont, Cape Town" },
-                new SearchAddress { AddressLocationId = 2, FormattedAddress ="1a Beta road, Somerset west, Cape Town" },
-                new SearchAddress { AddressLocationId = 3, FormattedAddress ="1b Beta Road, Somerset west, Cape Town" },
-            });
+            var targetRecords = await _geospatialContext.Address.Where(s => s.SuburbId == suburbId && 
+                                                                s.FullAddress.ToLower().Contains(searchText.ToLower()))
+                                                                .ToListAsync();
+            var matchingAddresses = _mapper.Map<List<SearchAddress>>(targetRecords);
+
+            return matchingAddresses;
         }
 
         public async Task<List<SearchAddress>> FindAddressesStartingWithStringAsync(string searchText, int suburbId)
         {
-            return await Task.FromResult(new List<SearchAddress>
-            {
-                new SearchAddress { AddressLocationId = 1, FormattedAddress ="123 Stringer Street, Claremont, Cape Town" },
-                new SearchAddress { AddressLocationId = 2, FormattedAddress ="1a Beta road, Somerset west, Cape Town" },
-                new SearchAddress { AddressLocationId = 3, FormattedAddress ="1b Beta Road, Somerset west, Cape Town" },
-            });
+            var targetRecords = await _geospatialContext.Address.Where(s => s.SuburbId == suburbId && 
+                                                                    s.FullAddress.ToLower().StartsWith(searchText.ToLower()))
+                                                                    .ToListAsync();
+            var matchingAddresses = _mapper.Map<List<SearchAddress>>(targetRecords);
+
+            return matchingAddresses;
         }
 
         public async Task<List<SearchAddress>> FindSectionalTitlesContainingStringAsync(string searchText, int suburbId)
         {
-            return await Task.FromResult(new List<SearchAddress>
-            {
-                new SearchAddress { AddressLocationId = 1, FormattedAddress = "Dolphin Inn Guest House"},
-                new SearchAddress { AddressLocationId = 2, FormattedAddress = "SS Mountain view"  }
-            });
+            var targetRecords = await _geospatialContext.Address.Where(s => s.SuburbId == suburbId &&
+                                                                   s.SsName != null &&
+                                                                   s.SsName.ToLower().Contains(searchText.ToLower()))
+                                                                   .GroupBy(g => g.FullAddress)
+                                                                   .Select(g => g.First())
+                                                                  .ToListAsync();
+            var matchingAddresses = _mapper.Map<List<SearchAddress>>(targetRecords);
+
+            return matchingAddresses;
         }
 
         public async Task<GeoLocation> FindAddressByIdAsync(int locationId)
         {
-            return new GeoLocation { LocationId = locationId, FormattedAddress = "123 Test street", Lat = -33.930889, Lng = 18.452491 };
+            var targetRecord = await _geospatialContext.Address.FirstAsync(s => s.AddressId == locationId);
+            var addressLocation = _mapper.Map<GeoLocation>(targetRecord);
+            return addressLocation;
         }
     }
 }

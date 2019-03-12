@@ -26,6 +26,7 @@ class MapViewController {
 
     attachHandlers() {
         this.$container.on('click', '.saveGeoLayerButton', {}, this.saveGeoLayerClickHandler.bind(this));
+        this.$container.on('click', '.saveGeoLocationButton', {}, this.saveGeoLocationClickHandler.bind(this));
     }
 
     attachEventListeners() {
@@ -46,6 +47,10 @@ class MapViewController {
 
         var layerModel = new GeoLayerModel(0, layerNameInput.val(), layerLevel, '');
         this.eventBroker.broadcast(EventType.BEFORE_SAVE_LAYER, layerModel);
+    }
+
+    saveGeoLocationClickHandler() {
+        swal("Feature coming soon!");
     }
 
     onGeoLayerSaving() {
@@ -102,10 +107,10 @@ class MapViewController {
                         </div>
                         <div class='info-window-item-row'>
                             <label>What3Words: </label>
-                            <input type='text' value='${geoLocation.What3Words}' readonly />
+                            <input type='text' value='${!geoLocation.What3Words ? "" : geoLocation.What3Words}' readonly />
                         </div>
                         <p />
-                        ${geoLocation.LocationId ? "" : "<input class='saveGeoLocationButton' type='button' value='Save Location' readonly />"}
+                        <input class='saveGeoLocationButton' type='button' value='Save Location' />
                     </span>
                 </div>`;
     }

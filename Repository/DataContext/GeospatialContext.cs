@@ -19,6 +19,10 @@ namespace Repository.DataContext
 
         public virtual DbSet<Setting> Setting { get; set; }
 
+        public virtual DbSet<Suburb> Suburb { get; set; }
+
+        public virtual DbSet<Address> Address { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<SpatialArea>(entity =>
@@ -47,6 +51,57 @@ namespace Repository.DataContext
                 entity.Property(e => e.UserId).HasColumnName("user_id").IsRequired(false);
                 entity.Property(e => e.SettingName).HasColumnName("setting_name").HasMaxLength(255).IsUnicode(false);
                 entity.Property(e => e.SettingValue).HasColumnName("setting_value");
+            });
+
+            modelBuilder.Entity<Address>(entity =>
+            {
+                entity.ToTable("address");
+
+                entity.Property(e => e.AddressId).HasColumnName("address_id");
+
+                entity.Property(e => e.FullAddress)
+                    .IsRequired()
+                    .HasColumnName("full_address")
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Lat)
+                    .HasColumnName("lat")
+                    .HasColumnType("decimal(13, 8)");
+
+                entity.Property(e => e.Lng)
+                    .HasColumnName("lng")
+                    .HasColumnType("decimal(13, 8)");
+
+                entity.Property(e => e.SsName)
+                    .HasColumnName("ss_name")
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SsUnit)
+                    .HasColumnName("ss_unit")
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SuburbId).HasColumnName("suburb_id");
+
+                entity.Property(e => e.What3words)
+                    .HasColumnName("what3words")
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Suburb>(entity =>
+            {
+                entity.ToTable("suburb");
+
+                entity.Property(e => e.SuburbId).HasColumnName("suburb_id");
+
+                entity.Property(e => e.LongName)
+                    .IsRequired()
+                    .HasColumnName("long_name")
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
             });
         }
     }

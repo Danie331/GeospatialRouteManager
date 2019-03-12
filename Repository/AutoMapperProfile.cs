@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Linq;
-using System;
 
 namespace Repository
 {
@@ -23,6 +22,16 @@ namespace Repository
             CreateMap<DomainModels.Geospatial.GeoSpatialLayer, DataModels.SpatialArea>().ConvertUsing<GeoJsonToDataConvertor>();
 
             CreateMap<List<DataModels.Setting>, DomainModels.Settings.UserSettings>().ConvertUsing<UserSettingsConvertor>();
+
+            CreateMap<DataModels.Suburb, DomainModels.Geospatial.SearchSuburb>().ForMember(s => s.FormattedName, a => a.MapFrom(e => e.LongName));
+
+            CreateMap<DataModels.Address, DomainModels.Geospatial.SearchAddress>().ForMember(s => s.AddressLocationId, a => a.MapFrom(e => e.AddressId))
+                                                                                  .ForMember(s => s.FormattedAddress,
+                                                                                    a => a.MapFrom(e => e.SsName != null ? $"{e.SsName} ({e.FullAddress})" : e.FullAddress));
+
+            CreateMap<DataModels.Address, DomainModels.Geospatial.GeoLocation>().ForMember(s => s.LocationId, a => a.MapFrom(e => e.AddressId))
+                                                                                .ForMember(s => s.FormattedAddress, 
+                                                                                    a => a.MapFrom(e => e.SsName != null ? $"{e.SsName} ({e.FullAddress})" : e.FullAddress));
         }
 
         public class DataToGeoJsonConvertor : ITypeConverter<DataModels.SpatialArea, DomainModels.Geospatial.GeoSpatialLayer>

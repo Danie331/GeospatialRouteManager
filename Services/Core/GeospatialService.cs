@@ -36,29 +36,34 @@ namespace Services.Core
 
         public async Task<GeoLocation> GetLocationAsync(GeoLocation location)
         {
-            // go to db first
             if (location.LocationId > 0)
             {
                 location = await _geospatialRepository.FindAddressByIdAsync(location.LocationId);
-                return location;
-            }
-
-            try
-            {
-                if (!string.IsNullOrEmpty(location.What3Words))
-                {
-                    location = await _what3WordsProvider.ForwardGeocode(location.What3Words);
-                }
-                else
+                if (string.IsNullOrEmpty(location.What3Words))
                 {
                     location.What3Words = await _what3WordsProvider.ReverseGeocode(location.Lat, location.Lng);
+                    // TODO: save to db - not here but from save btn.
                 }
             }
-            catch (Exception ex)
+            else
             {
-                // Log.
+                try
+                {
+                    if (!string.IsNullOrEmpty(location.What3Words))
+                    {
+                        // first search db for w3w, else ...
+                        location = await _what3WordsProvider.ForwardGeocode(location.What3Words);
+                    }
+                    else
+                    {
+                        location.What3Words = await _what3WordsProvider.ReverseGeocode(location.Lat, location.Lng);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log.
+                }
             }
-
             return location;
         }
 
@@ -78,7 +83,7 @@ namespace Services.Core
                 return await _geospatialRepository.FindAddressesWithStreetNumberAsync(searchText, suburbId);
             }
 
-            if (searchText.Length >= 5)
+            if (searchText.Length >= 4)
             {
                 // "Contains" search
                 return await _geospatialRepository.FindAddressesContainingStringAsync(searchText, suburbId);

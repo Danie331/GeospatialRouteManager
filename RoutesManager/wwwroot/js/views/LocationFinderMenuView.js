@@ -48,6 +48,7 @@ class LocationFinderMenuView {
                 context.addressAutoCompleteCallback = responseCallback;
             },
             select: function (event, ui) {
+                $.blockUI({ message: "<h2 class='loading-text'>Finding Location...</h2>" });     
                 event.preventDefault();
                 $(this).val(ui.item.label);
                 var geoLocationModel = new GeoLocationModel(ui.item.value, '', 0, 0, null, null);
@@ -64,6 +65,7 @@ class LocationFinderMenuView {
                 context.sectionalTitleAutoCompleteCallback = responseCallback;
             },
             select: function (event, ui) {
+                $.blockUI({ message: "<h2 class='loading-text'>Finding Location...</h2>" });     
                 event.preventDefault();
                 $(this).val(ui.item.label);
                 var geoLocationModel = new GeoLocationModel(ui.item.value, '', 0, 0, null, null);
