@@ -42,31 +42,29 @@ class GoogleMapView {
     createMapCallback() {
         window["initGoogleMap"] = () => {
             try {
-                if (navigator && navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(pos => {
-                        this.map = new google.maps.Map(document.getElementById("map"),
-                            { mapTypeId: 'roadmap', center: { lat: pos.coords.latitude, lng: pos.coords.longitude }, zoom: 13 });
+                const coords = { latitude: -33.945282, longitude: 18.597752 };
+                this.map = new google.maps.Map(document.getElementById("map"),
+                    { mapTypeId: 'roadmap', center: { lat: coords.latitude, lng: coords.longitude }, zoom: 10 });
 
-                        this.enableDrawing();
-                        
-                        var context = this;
-                        this.map.data.addListener('click', event => {
-                            context.handleLayerClick(event.feature);
-                            context.handleDeleteVertex(event);
-                        });
-                        this.map.data.setStyle(feature => {
-                            var colour = feature.getProperty("LayerColour");
-                            return {
-                                fillColor: colour,
-                                fillOpacity: 0.7,
-                                strokeWeight: 1
-                            }
-                        });
+                this.enableDrawing();
 
-                        this.infowindow = new google.maps.InfoWindow();
-                        this.eventBroker.broadcast(EventType.MAP_LOADED, {});
-                    });
-                }
+                var context = this;
+                this.map.data.addListener('click', event => {
+                    context.handleLayerClick(event.feature);
+                    context.handleDeleteVertex(event);
+                });
+                this.map.data.setStyle(feature => {
+                    var colour = feature.getProperty("LayerColour");
+                    return {
+                        fillColor: colour,
+                        fillOpacity: 0.7,
+                        strokeWeight: 1
+                    }
+                });
+
+                this.infowindow = new google.maps.InfoWindow();
+                this.eventBroker.broadcast(EventType.MAP_LOADED, {});
+
             } catch (e) {
                 console.log(e);
             }

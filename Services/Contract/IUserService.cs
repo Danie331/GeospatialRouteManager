@@ -8,5 +8,6 @@ namespace Services.Contract
     {
         Task<UserSettings> GetMySettingsAsync();
         Task UpdateMySettingsAsync(DomainModels.Settings.UserSettings settings);
+        Task<bool> AuthenticateAsync(DomainModels.Credentials credentials);
     }
 }

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AutoMapper;
 using DomainModels.Geospatial;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Contract;
 
@@ -11,6 +12,7 @@ using Services.Contract;
 // 3. Add bundling + minification
 namespace Api.Controllers
 {
+    [Authorize]
     [Route("api/geospatial")]
     [ApiController]
     public class GeospatialController : ControllerBase

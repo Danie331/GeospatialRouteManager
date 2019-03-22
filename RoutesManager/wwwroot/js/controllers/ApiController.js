@@ -1,6 +1,6 @@
 ﻿class ApiController {
     constructor(eventObserver) {
-        this.apiBaseUrl = 'http://localhost:8000/api';//'https://apiroutemanager2.azurewebsites.net/api'; 
+        this.apiBaseUrl = app.API_BASE_URL;
         this.eventObserver = eventObserver;
 
         this.init();
@@ -25,7 +25,7 @@
 
     getMyAreas() {
         var endpoint = `${this.apiBaseUrl}/geospatial/myareas`;
-        fetch(endpoint)
+        fetch(endpoint, this.createRequestObject('GET', null))
             .then(function (response) {
                 if (!response.ok) {
                     throw Error(response.statusText);
@@ -44,7 +44,7 @@
     
     saveGeoLayer(layerModel) {
         var endpoint = `${this.apiBaseUrl}/geospatial/savelayer`;
-        fetch(endpoint, this.createJsonPayload('POST', layerModel))
+        fetch(endpoint, this.createRequestObject('POST', layerModel))
             .then(function (response) {
                 if (!response.ok) {
                     throw Error(response.statusText);
@@ -59,7 +59,7 @@
 
     loadSettings(/* user Id */) {
         var endpoint = `${this.apiBaseUrl}/user/mysettings`;
-        fetch(endpoint)
+        fetch(endpoint, this.createRequestObject('GET', null))
             .then(function (response) {
                 if (!response.ok) {
                     throw Error(response.statusText);
@@ -74,7 +74,7 @@
 
     saveSettings(settings) {
         var endpoint = `${this.apiBaseUrl}/user/updatesettings`;
-        fetch(endpoint, this.createJsonPayload('POST', settings))
+        fetch(endpoint, this.createRequestObject('POST', settings))
             .then(function (response) {
                 if (!response.ok) {
                     throw Error(response.statusText);
@@ -88,7 +88,7 @@
 
     findLocation(geoLocationModel) {
         var endpoint = `${this.apiBaseUrl}/geospatial/findlocation`;
-        fetch(endpoint, this.createJsonPayload('POST', geoLocationModel))
+        fetch(endpoint, this.createRequestObject('POST', geoLocationModel))
             .then(function (response) {
                 if (!response.ok) {
                     throw Error(response.statusText);
@@ -103,7 +103,7 @@
 
     suburbsSearch(addressModel) {
         var endpoint = `${this.apiBaseUrl}/geospatial/findmatchingsuburbs?searchText=${addressModel.SearchText}`;
-        fetch(endpoint)
+        fetch(endpoint, this.createRequestObject('GET', null))
             .then(function (response) {
                 if (!response.ok) {
                     throw Error(response.statusText);
@@ -118,7 +118,7 @@
 
     addressesSearch(addressModel) {
         var endpoint = `${this.apiBaseUrl}/geospatial/findmatchingaddresses?searchText=${addressModel.SearchText}&suburbId=${addressModel.SuburbId}`;
-        fetch(endpoint)
+        fetch(endpoint, this.createRequestObject('GET', null))
             .then(function (response) {
                 if (!response.ok) {
                     throw Error(response.statusText);
@@ -133,7 +133,7 @@
 
     sectionalTitleSearch(addressModel) {
         var endpoint = `${this.apiBaseUrl}/geospatial/findmatchingsectionaltitles?searchText=${addressModel.SearchText}&suburbId=${addressModel.SuburbId}`;
-        fetch(endpoint)
+        fetch(endpoint, this.createRequestObject('GET', null))
             .then(function (response) {
                 if (!response.ok) {
                     throw Error(response.statusText);
@@ -146,18 +146,24 @@
             .catch(err => this.handleApiError(err));
     }
 
-    createJsonPayload(method, model) {
-        var body = model.toString();
+    createRequestObject(method, model) {
+        var body = model != null ? model.toString() : null;
+        var headers = new Headers();
+        headers.append("Content-Type", 'application/json');
+        headers.append("Authorization", `Bearer ${localStorage.getItem('access-token')}`);
         var payload = {
             method: method,
             body: body,
-            headers: { 'Content-Type': 'application/json' }
+            headers: headers
         };
 
         return payload;
     }
 
     handleApiError(error) {
-        console.log(error);
+        console.log(error.message);
+        if (error.message === "Unauthorized") {
+            window.location = 'unauthorized.html';
+        }
     }
 }

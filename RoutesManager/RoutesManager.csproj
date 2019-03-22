@@ -25,6 +25,7 @@
   <ItemGroup>
     <Folder Include="wwwroot\lib\leaflet\" />
     <Folder Include="wwwroot\lib\leaflet-icon-pulse\" />
+    <Folder Include="wwwroot\lib\login-form-10-colorlib\" />
     <Folder Include="wwwroot\lib\wicket\" />
     <Folder Include="wwwroot\lib\slidermenu\" />
     <Folder Include="wwwroot\img\" />

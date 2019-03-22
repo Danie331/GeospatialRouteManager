@@ -18,27 +18,23 @@ class LeafletMapView {
 
     createMap() {
         try {
-            if (navigator && navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    const coords = pos.coords;
+            const coords = { latitude: -33.945282, longitude: 18.597752 };
 
-                    this.map = L.map('map', {
-                        center: [coords.latitude, coords.longitude],
-                        zoom: 13,
-                        dragging: true
-                    });
-                    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZGFuaWUzMzAiLCJhIjoiY2pxeTlqc242MDE5cTQzcnpubHlyeTJucyJ9.Omq9E98-rSVM2EWccOdFtg', {
-                        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-                        maxZoom: 30,
-                        id: 'mapbox.streets',
-                        accessToken: 'pk.eyJ1IjoiZGFuaWUzMzAiLCJhIjoiY2pxeTlqc242MDE5cTQzcnpubHlyeTJucyJ9.Omq9E98-rSVM2EWccOdFtg'
-                    }).addTo(this.map);
+            this.map = L.map('map', {
+                center: [coords.latitude, coords.longitude],
+                zoom: 10,
+                dragging: true
+            });
+            L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZGFuaWUzMzAiLCJhIjoiY2pxeTlqc242MDE5cTQzcnpubHlyeTJucyJ9.Omq9E98-rSVM2EWccOdFtg', {
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                maxZoom: 30,
+                id: 'mapbox.streets',
+                accessToken: 'pk.eyJ1IjoiZGFuaWUzMzAiLCJhIjoiY2pxeTlqc242MDE5cTQzcnpubHlyeTJucyJ9.Omq9E98-rSVM2EWccOdFtg'
+            }).addTo(this.map);
 
-                    this.enableDrawing();
+            this.enableDrawing();
 
-                    this.eventBroker.broadcast(EventType.MAP_LOADED, {});
-                });
-            }
+            this.eventBroker.broadcast(EventType.MAP_LOADED, {});
         }
         catch (e) {
             console.log(e);
