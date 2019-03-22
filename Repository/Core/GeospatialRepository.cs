@@ -68,8 +68,11 @@ namespace Repository.Core
 
         public async Task<List<SearchAddress>> FindAddressesWithStreetNumberAsync(string searchText, int suburbId)
         {
-            var targetRecords = await _geospatialContext.Address.Where(s => s.SuburbId == suburbId && s.FullAddress.StartsWith(searchText))
-                                                                .ToListAsync();
+            var targetRecords = await _geospatialContext.Address.Where(s => s.SuburbId == suburbId && 
+                                                                    s.FullAddress.StartsWith(searchText))
+                                                                    .GroupBy(g => g.FullAddress)
+                                                                    .Select(g => g.First())
+                                                                    .ToListAsync();
             var matchingAddresses = _mapper.Map<List<SearchAddress>>(targetRecords);
 
             return matchingAddresses;
@@ -77,8 +80,10 @@ namespace Repository.Core
 
         public async Task<List<SearchAddress>> FindAddressesContainingStringAsync(string searchText, int suburbId)
         {
-            var targetRecords = await _geospatialContext.Address.Where(s => s.SuburbId == suburbId && 
+            var targetRecords = await _geospatialContext.Address.Where(s => s.SuburbId == suburbId &&
                                                                 s.FullAddress.ToLower().Contains(searchText.ToLower()))
+                                                                .GroupBy(g => g.FullAddress)
+                                                                .Select(g => g.First())
                                                                 .ToListAsync();
             var matchingAddresses = _mapper.Map<List<SearchAddress>>(targetRecords);
 
@@ -89,6 +94,8 @@ namespace Repository.Core
         {
             var targetRecords = await _geospatialContext.Address.Where(s => s.SuburbId == suburbId && 
                                                                     s.FullAddress.ToLower().StartsWith(searchText.ToLower()))
+                                                                    .GroupBy(g => g.FullAddress)
+                                                                    .Select(g => g.First())
                                                                     .ToListAsync();
             var matchingAddresses = _mapper.Map<List<SearchAddress>>(targetRecords);
 
