@@ -52,6 +52,15 @@ namespace Api.Controllers
             return _mapper.Map<ApiDto.GeoLocation>(result);
         }
 
+        [HttpPost]
+        [Route("findw3w")]
+        public async Task<ApiDto.GeoLocation> GetWhat3Words(ApiDto.GeoLocation location)
+        {
+            var locationDto = _mapper.Map<GeoLocation>(location);
+            var result = await _geospatialService.GetWhat3WordsAsync(locationDto);
+            return _mapper.Map<ApiDto.GeoLocation>(result);
+        }
+
         [HttpGet]
         [Route("findmatchingsuburbs")]
         public async Task<List<ApiDto.SearchSuburb>> GetMatchingSuburbs([FromQuery] string searchText)

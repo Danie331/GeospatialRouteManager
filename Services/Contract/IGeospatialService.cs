@@ -12,5 +12,6 @@ namespace Services.Contract
         Task<List<SearchSuburb>> GetMatchingSuburbsAsync(string searchText);
         Task<List<SearchAddress>> GetMatchingAddressesAsync(string searchText, int suburbId);
         Task<List<SearchAddress>> GetMatchingSectionalTitlesAsync(string searchText, int suburbId);
+        Task<GeoLocation> GetWhat3WordsAsync(GeoLocation locationDto);
     }
 }

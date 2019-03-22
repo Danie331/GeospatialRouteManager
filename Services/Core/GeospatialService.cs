@@ -34,6 +34,12 @@ namespace Services.Core
             return areas.OrderBy(a => a.LayerName).ToList();
         }
 
+        public async Task<GeoLocation> GetWhat3WordsAsync(GeoLocation location)
+        {
+            location.What3Words = await _what3WordsProvider.ReverseGeocode(location.Lat, location.Lng);
+            return location;
+        }
+
         public async Task<GeoLocation> GetLocationAsync(GeoLocation location)
         {
             if (location.LocationId > 0)
@@ -41,7 +47,7 @@ namespace Services.Core
                 location = await _geospatialRepository.FindAddressByIdAsync(location.LocationId);
                 if (string.IsNullOrEmpty(location.What3Words))
                 {
-                    location.What3Words = await _what3WordsProvider.ReverseGeocode(location.Lat, location.Lng);
+                    //location.What3Words = await _what3WordsProvider.ReverseGeocode(location.Lat, location.Lng);
                     // TODO: save to db - not here but from save btn.
                 }
             }
@@ -56,7 +62,7 @@ namespace Services.Core
                     }
                     else
                     {
-                        location.What3Words = await _what3WordsProvider.ReverseGeocode(location.Lat, location.Lng);
+                        //location.What3Words = await _what3WordsProvider.ReverseGeocode(location.Lat, location.Lng);
                     }
                 }
                 catch (Exception ex)

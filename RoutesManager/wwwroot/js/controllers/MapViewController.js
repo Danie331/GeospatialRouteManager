@@ -95,6 +95,9 @@ class MapViewController {
     }
 
     getGeolocationPopupContent(geoLocation) {
+        if (!geoLocation.What3Words) {
+            this.eventBroker.broadcast(EventType.FIND_3_WORDS, geoLocation);
+        } 
         return `<div>
                     <span>
                         <div class='info-window-item-row'>
@@ -107,10 +110,9 @@ class MapViewController {
                         </div>
                         <div class='info-window-item-row'>
                             <label>What3Words: </label>
-                            <input type='text' value='${!geoLocation.What3Words ? "" : geoLocation.What3Words}' readonly />
+                            <input class='w3wInput' type='text' value='${!geoLocation.What3Words ? "Loading..." : geoLocation.What3Words}' readonly />
                         </div>
                         <p />
-                        <input class='saveGeoLocationButton' type='button' value='Save Location' />
                     </span>
                 </div>`;
     }

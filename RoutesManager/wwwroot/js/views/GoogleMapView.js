@@ -27,6 +27,7 @@ class GoogleMapView {
         this.eventBroker.subscribe(this.onSelectLayer.bind(this), EventType.SELECT_LAYER);
         this.eventBroker.subscribe(this.toggleLayers.bind(this), EventType.TOGGLE_LAYERS);
         this.eventBroker.subscribe(this.plotLocationMarker.bind(this), EventType.PLOT_LOCATION);
+        this.eventBroker.subscribe(this.plotLocationMarker.bind(this), EventType.W3W_RETRIEVED);
 
         return this;
     }
@@ -232,7 +233,7 @@ class GoogleMapView {
     }
 
     plotLocationMarker(geoLocationModel) {
-        $.unblockUI();
+        $.unblockUI();      
    
         var locationPos = new google.maps.LatLng(geoLocationModel.Lat, geoLocationModel.Lng);
         var marker = new google.maps.Marker({

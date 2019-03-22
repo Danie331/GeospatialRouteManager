@@ -16,6 +16,7 @@
         this.eventObserver.subscribe(this.loadSettings.bind(this), EventType.LOAD_SETTINGS);
         this.eventObserver.subscribe(this.saveSettings.bind(this), EventType.SAVE_SETTINGS);
         this.eventObserver.subscribe(this.findLocation.bind(this), EventType.FIND_LOCATION);
+        this.eventObserver.subscribe(this.findWhat3Words.bind(this), EventType.FIND_3_WORDS);
         this.eventObserver.subscribe(this.suburbsSearch.bind(this), EventType.SEARCH_SUBURBS);
         this.eventObserver.subscribe(this.addressesSearch.bind(this), EventType.SEARCH_ADDRESSES);
         this.eventObserver.subscribe(this.sectionalTitleSearch.bind(this), EventType.SEARCH_SECTIONAL_TITLES);
@@ -97,6 +98,22 @@
             })
             .then(res => {
                 this.eventObserver.broadcast(EventType.PLOT_LOCATION, new GeoLocationModel(res.LocationId, res.FormattedAddress, res.Lat, res.Lng, res.What3Words, null));
+            })
+            .catch(err => this.handleApiError(err));
+    }
+
+    findWhat3Words(geoLocationModel) {
+        var endpoint = `${this.apiBaseUrl}/geospatial/findw3w`;
+        fetch(endpoint, this.createRequestObject('POST', geoLocationModel))
+            .then(function (response) {
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                }
+                return response.json();
+            })
+            .then(res => {
+                geoLocationModel.What3Words = res.What3Words;
+                this.eventObserver.broadcast(EventType.W3W_RETRIEVED, geoLocationModel);
             })
             .catch(err => this.handleApiError(err));
     }
