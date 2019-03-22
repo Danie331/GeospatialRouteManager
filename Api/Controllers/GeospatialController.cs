@@ -44,6 +44,14 @@ namespace Api.Controllers
         }
 
         [HttpPost]
+        [Route("deletelayer")]
+        public async Task DeleteGeoLayer(ApiDto.GeoFeatureLayer layer)
+        {
+            var dto = _mapper.Map<GeoSpatialLayer>(layer);
+            await _geospatialService.DeleteGeoLayerAsync(dto);
+        }
+
+        [HttpPost]
         [Route("findlocation")]
         public async Task<ApiDto.GeoLocation> GetLocation(ApiDto.GeoLocation location)
         {

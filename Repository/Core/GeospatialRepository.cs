@@ -45,10 +45,17 @@ namespace Repository.Core
 
         public async Task<List<GeoSpatialLayer>> GetMyAreasAsync()
         {
-            var spatialAreas = await _geospatialContext.SpatialArea.ToListAsync();
+            var spatialAreas = await _geospatialContext.SpatialArea.Where(s => !s.Deleted).ToListAsync();
             var areas = _mapper.Map<List<GeoSpatialLayer>>(spatialAreas);
 
             return areas;
+        }
+
+        public async Task DeleteGeoLayerAsync(int id)
+        {
+            var targetLayer = await _geospatialContext.SpatialArea.FirstAsync(d => d.Id == id);
+            targetLayer.Deleted = true;
+            await _geospatialContext.SaveChangesAsync();
         }
 
         public async Task<List<SearchSuburb>> FindSuburbsSimilarToAsync(string searchText)

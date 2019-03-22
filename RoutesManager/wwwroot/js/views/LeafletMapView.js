@@ -45,6 +45,8 @@ class LeafletMapView {
 
     attachEventListeners() {
         this.eventBroker.subscribe(this.onSaveLayer.bind(this), EventType.BEFORE_SAVE_LAYER);
+        this.eventBroker.subscribe(this.onDeleteLayer.bind(this), EventType.BEFORE_DELETE_LAYER);
+        this.eventBroker.subscribe(this.onLayerDeleted.bind(this), EventType.LAYER_DELETED);
         this.eventBroker.subscribe(this.onLayerSaved.bind(this), EventType.LAYER_SAVED);
         this.eventBroker.subscribe(this.onLayersLoaded.bind(this), EventType.LAYERS_LOADED);
         this.eventBroker.subscribe(this.onSelectLayer.bind(this), EventType.SELECT_LAYER);
@@ -96,6 +98,29 @@ class LeafletMapView {
         var geojson = this.activeLayer.toGeoJSON();
         var id = geojson.properties.Id || 0;
         this.eventBroker.broadcast(EventType.SAVE_LAYER, new GeoLayerModel(id, layerData.LayerName, layerData.Level, geojson));
+    }
+
+    onDeleteLayer() {
+        var geojson = this.activeLayer.toGeoJSON();
+        var id = geojson.properties.Id || 0;
+        this.eventBroker.broadcast(EventType.DELETE_LAYER, new GeoLayerModel(id, '', 0, ''));
+    }
+
+    onLayerDeleted(layerModel) {
+        this.unselectActiveLayer();
+        var context = this;
+        this.map.eachLayer(function (layer) {
+            if (typeof layer.toGeoJSON === 'undefined')
+                return;
+            var geojson = layer.toGeoJSON();
+            if (_.has(geojson, 'properties') && geojson.properties.Id == layerModel.Id) {
+                context.map.removeLayer(layer);
+            }
+        });
+
+        _.remove(this.layersCache, layer => layer.Id === layerModel.Id);
+
+        $.unblockUI();
     }
 
     onLayerSaved(geoLayerModel) {

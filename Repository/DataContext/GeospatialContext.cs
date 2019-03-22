@@ -42,6 +42,9 @@ namespace Repository.DataContext
                 entity.Property(e => e.GeoLayer)
                 .HasColumnName("geo_polygon")
                 .HasColumnType("geography");
+
+                entity.Property(e => e.Deleted)
+                .HasColumnName("deleted");
             });
 
             modelBuilder.Entity<Setting>(entity =>

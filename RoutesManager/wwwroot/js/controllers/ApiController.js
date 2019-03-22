@@ -12,6 +12,7 @@
 
     attachEventListeners() {
         this.eventObserver.subscribe(this.saveGeoLayer.bind(this), EventType.SAVE_LAYER);
+        this.eventObserver.subscribe(this.deleteGeoLayer.bind(this), EventType.DELETE_LAYER);
         this.eventObserver.subscribe(this.getMyAreas.bind(this), EventType.MAP_LOADED);
         this.eventObserver.subscribe(this.loadSettings.bind(this), EventType.LOAD_SETTINGS);
         this.eventObserver.subscribe(this.saveSettings.bind(this), EventType.SAVE_SETTINGS);
@@ -54,6 +55,20 @@
             })
             .then(res => {
                 this.eventObserver.broadcast(EventType.LAYER_SAVED, new GeoLayerModel(res.Id, res.LayerName, res.Level, res.Geojson));
+            })
+            .catch(err => this.handleApiError(err));
+    }
+
+    deleteGeoLayer(layerModel) {
+        var endpoint = `${this.apiBaseUrl}/geospatial/deletelayer`;
+        fetch(endpoint, this.createRequestObject('POST', layerModel))
+            .then(function (response) {
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                }
+            })
+            .then(() => {
+                this.eventObserver.broadcast(EventType.LAYER_DELETED, new GeoLayerModel(layerModel.Id, '', 0, ''));
             })
             .catch(err => this.handleApiError(err));
     }

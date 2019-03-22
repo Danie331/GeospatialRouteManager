@@ -26,7 +26,7 @@ class MapViewController {
 
     attachHandlers() {
         this.$container.on('click', '.saveGeoLayerButton', {}, this.saveGeoLayerClickHandler.bind(this));
-        this.$container.on('click', '.saveGeoLocationButton', {}, this.saveGeoLocationClickHandler.bind(this));
+        this.$container.on('click', '.deleteGeoLayerButton', {}, this.deleteGeoLayerClickHandler.bind(this));
     }
 
     attachEventListeners() {
@@ -49,8 +49,21 @@ class MapViewController {
         this.eventBroker.broadcast(EventType.BEFORE_SAVE_LAYER, layerModel);
     }
 
-    saveGeoLocationClickHandler() {
-        swal("Feature coming soon!");
+    deleteGeoLayerClickHandler() {
+        Swal.fire({
+            title: 'Delete Layer?',
+            text: "",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes'
+        }).then((result) => {
+            if (result.value) {
+                $.blockUI({ message: "<h2 class='loading-text'>Deleting Layer...</h2>" });
+                this.eventBroker.broadcast(EventType.BEFORE_DELETE_LAYER, {});
+            }
+        });      
     }
 
     onGeoLayerSaving() {
@@ -90,6 +103,7 @@ class MapViewController {
                         </div>
                         <p />
                         <input class='saveGeoLayerButton' type='button' value='Save' />
+                        <input class='deleteGeoLayerButton' type='button' value='Delete Layer' />
                     </span>
                 </div>`;
     }

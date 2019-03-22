@@ -168,3 +168,12 @@ input[type=button] {
     overflow-y: scroll;
     overflow-x: hidden;
 }
+
+.saveGeoLayerButton {
+    display: inline-block;
+}
+
+.deleteGeoLayerButton {
+    display: inline-block;
+    float: right;
+}

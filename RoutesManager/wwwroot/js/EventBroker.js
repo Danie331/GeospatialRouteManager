@@ -6,6 +6,9 @@ const EventType = {
     LAYER_SAVED: 'LAYER_SAVED',
     CLICK_LAYER: 'CLICK_LAYER',
     SELECT_LAYER: 'SELECT_LAYER', 
+    BEFORE_DELETE_LAYER: 'BEFORE_DELETE_LAYER',
+    DELETE_LAYER: 'DELETE_LAYER',
+    LAYER_DELETED: 'LAYER_DELETED',
 
     // map events
     MAP_LOADED: 'MAP_LOADED',
@@ -43,6 +46,9 @@ class EventBroker {
             LAYER_SAVED: [],
             CLICK_LAYER: [],
             SELECT_LAYER: [],
+            BEFORE_DELETE_LAYER: [],
+            DELETE_LAYER: [],
+            LAYER_DELETED: [],
 
             MAP_LOADED: [],            
             PLOT_LOCATION: [],

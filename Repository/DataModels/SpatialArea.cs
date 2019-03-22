@@ -14,5 +14,7 @@ namespace Repository.DataModels
 
         [Column(TypeName = "geography")]
         public IGeometry GeoLayer { get; set; }
+
+        public bool Deleted { get; set; }
     }
 }

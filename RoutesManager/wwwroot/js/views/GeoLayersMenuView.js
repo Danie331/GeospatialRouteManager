@@ -38,6 +38,7 @@ class GeoLayersMenuView {
         this.eventBroker.subscribe(this.onLayersLoaded.bind(this), EventType.LAYERS_LOADED);
         this.eventBroker.subscribe(this.onLayerSaved.bind(this), EventType.LAYER_SAVED);
         this.eventBroker.subscribe(this.toggleSelectableLayers.bind(this), EventType.TOGGLE_LAYERS);
+        this.eventBroker.subscribe(this.onLayerDeleted.bind(this), EventType.LAYER_DELETED);
 
         return this;
     }
@@ -59,6 +60,13 @@ class GeoLayersMenuView {
         }
  
         //$("#layersListContainer").append(this.appendLayerLink(layerModel));
+    }
+
+    onLayerDeleted(model) {
+        var targetlink = $("#layersListContainer").find(`[data-layerid='${model.Id}']`);
+        if (targetlink.length) {
+            targetlink.remove();
+        }
     }
 
     onLayersLoaded(layerModelList) {

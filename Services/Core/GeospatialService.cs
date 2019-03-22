@@ -34,6 +34,14 @@ namespace Services.Core
             return areas.OrderBy(a => a.LayerName).ToList();
         }
 
+        public async Task DeleteGeoLayerAsync(GeoSpatialLayer layer)
+        {
+            if (layer.Id == 0)
+                return;
+
+            await _geospatialRepository.DeleteGeoLayerAsync(layer.Id);
+        }
+
         public async Task<GeoLocation> GetWhat3WordsAsync(GeoLocation location)
         {
             location.What3Words = await _what3WordsProvider.ReverseGeocode(location.Lat, location.Lng);
