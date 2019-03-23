@@ -1,8 +1,8 @@
 ﻿
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NLog.Web;
 
 namespace Api
 {
@@ -15,13 +15,12 @@ namespace Api
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .ConfigureLogging((hostingContext, logging) =>
+                .ConfigureLogging(logging =>
                 {
-                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
-                    logging.AddConsole();
-                    logging.AddDebug();
-                    logging.AddEventSourceLogger();
+                    logging.ClearProviders();
+                    logging.SetMinimumLevel(LogLevel.Error);
                 })
+                .UseNLog()
                 .UseStartup<Startup>();
     }
 }

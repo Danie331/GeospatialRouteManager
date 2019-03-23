@@ -264,3 +264,4 @@ __pycache__/
 *.pyc
 /Api/Properties/PublishProfiles
 *.pubxml
+/Api/internalLog.txt
