@@ -49,7 +49,17 @@ namespace RoutesManager
             options.DefaultFileNames.Clear();
             options.DefaultFileNames.Add("login.html");
             app.UseDefaultFiles(options);
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = context =>
+                {
+                    if (context.File.Name == "app.min.js")
+                    {
+                        context.Context.Response.Headers.Add("Cache-Control", "no-cache, no-store");
+                        context.Context.Response.Headers.Add("Expires", "-1");
+                    }
+                }
+            });
             app.UseCookiePolicy();           
 
             app.UseMvc();

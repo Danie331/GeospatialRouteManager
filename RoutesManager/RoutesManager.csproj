@@ -17,6 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="bundleconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BuildBundlerMinifier" Version="2.9.406" />
     <PackageReference Include="jQuery.UI.Combined" Version="1.12.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
@@ -32,6 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="bundleconfig.json" />
     <None Include="wwwroot\index.html" />
   </ItemGroup>
 

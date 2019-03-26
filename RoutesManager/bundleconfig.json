@@ -1,0 +1,26 @@
+[
+  {
+    "outputFileName": "wwwroot/app.min.js",
+    "inputFiles": [
+      "wwwroot/js/controllers/ApiController.js",
+      "wwwroot/js/controllers/MapViewController.js",
+      "wwwroot/js/controllers/MenuViewController.js",
+
+      "wwwroot/js/models/AddressSearchModel.js",
+      "wwwroot/js/models/GeoLayerModel.js",
+      "wwwroot/js/models/GeoLocationModel.js",
+      "wwwroot/js/models/LabelValueModel.js",
+      "wwwroot/js/models/UserSettingsModel.js",
+
+      "wwwroot/js/views/GeoLayersMenuView.js",
+      "wwwroot/js/views/GoogleMapView.js",
+      "wwwroot/js/views/LeafletMapView.js",
+      "wwwroot/js/views/LocationFinderMenuView.js",
+      "wwwroot/js/views/SettingsMenuView.js",
+
+      "wwwroot/js/App.js",
+      "wwwroot/js/AppConfig.js",
+      "wwwroot/js/EventBroker.js"
+    ]
+  }
+]
