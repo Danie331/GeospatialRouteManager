@@ -35,6 +35,7 @@ class MapViewController {
         this.eventBroker.subscribe(this.onLayerClick.bind(this), EventType.CLICK_LAYER);
         this.eventBroker.subscribe(this.onSettingsLoaded.bind(this), EventType.SETTINGS_LOADED);
         this.eventBroker.subscribe(this.onMapLoaded.bind(this), EventType.AFTER_LAYERS_SHOWN);
+        this.eventBroker.subscribe(this.onW3wRetrieved.bind(this), EventType.W3W_RETRIEVED);
     }
 
     saveGeoLayerClickHandler() {
@@ -109,10 +110,7 @@ class MapViewController {
     }
 
     getGeolocationPopupContent(geoLocation) {
-        if (!geoLocation.What3Words) {
-            this.eventBroker.broadcast(EventType.FIND_3_WORDS, geoLocation);
-        } 
-        return `<div>
+        return `<div class='info-window-geolocation'>
                     <span>
                         <div class='info-window-item-row'>
                             <label>Address: </label>
@@ -124,11 +122,18 @@ class MapViewController {
                         </div>
                         <div class='info-window-item-row'>
                             <label>What3Words: </label>
-                            <input class='w3wInput' type='text' value='${!geoLocation.What3Words ? "Loading..." : geoLocation.What3Words}' readonly />
+                            <input id='w3wInput-${geoLocation.uniqueIdentifier()}' type='text' value='${!geoLocation.What3Words ? "Loading..." : geoLocation.What3Words}' readonly />
                         </div>
                         <p />
                     </span>
                 </div>`;
+    }
+
+    onW3wRetrieved(geoLocation) {
+        var targetElement = $(`#w3wInput-${geoLocation.uniqueIdentifier()}`);
+        if (targetElement.length) {
+            targetElement.val(geoLocation.What3Words);
+        }
     }
 
     onMapLoaded() {

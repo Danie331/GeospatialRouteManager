@@ -29,7 +29,6 @@ class GoogleMapView {
         this.eventBroker.subscribe(this.onSelectLayer.bind(this), EventType.SELECT_LAYER);
         this.eventBroker.subscribe(this.toggleLayers.bind(this), EventType.TOGGLE_LAYERS);
         this.eventBroker.subscribe(this.plotLocationMarker.bind(this), EventType.PLOT_LOCATION);
-        this.eventBroker.subscribe(this.plotLocationMarker.bind(this), EventType.W3W_RETRIEVED);
 
         return this;
     }
@@ -261,12 +260,16 @@ class GoogleMapView {
         var context = this;
         marker.addListener('click', function () {
             context.infowindow.close();
-            context.infowindow.setContent(content);
+            context.infowindow.setContent(context.viewController.getGeolocationPopupContent(geoLocationModel));
             context.infowindow.open(context.map, marker);
         });
 
         this.map.panTo(marker.getPosition());
         this.infowindow.setContent(content);
         this.infowindow.open(this.map, marker);
+
+        if (!geoLocationModel.What3Words) {
+            this.eventBroker.broadcast(EventType.FIND_3_WORDS, geoLocationModel);
+        } 
     }
 }

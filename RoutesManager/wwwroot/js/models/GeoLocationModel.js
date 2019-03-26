@@ -12,4 +12,8 @@ class GeoLocationModel {
     toString() {
         return JSON.stringify(this);
     }
+
+    uniqueIdentifier() {
+        return (((this.Lat + 90) * 180 + this.Lng) + '').replace('.', '');
+    }
 }
