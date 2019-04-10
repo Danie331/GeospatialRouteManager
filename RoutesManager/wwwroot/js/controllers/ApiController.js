@@ -13,8 +13,7 @@
     attachEventListeners() {
         this.eventObserver.subscribe(this.saveGeoLayer.bind(this), EventType.SAVE_LAYER);
         this.eventObserver.subscribe(this.deleteGeoLayer.bind(this), EventType.DELETE_LAYER);
-        this.eventObserver.subscribe(this.getMyAreas.bind(this), EventType.MAP_LOADED);
-        this.eventObserver.subscribe(this.loadSettings.bind(this), EventType.LOAD_SETTINGS);
+        this.eventObserver.subscribe(this.getAreas.bind(this), EventType.MAP_LOADED);
         this.eventObserver.subscribe(this.saveSettings.bind(this), EventType.SAVE_SETTINGS);
         this.eventObserver.subscribe(this.findLocation.bind(this), EventType.FIND_LOCATION);
         this.eventObserver.subscribe(this.findWhat3Words.bind(this), EventType.FIND_3_WORDS);
@@ -25,8 +24,12 @@
 
     /////////////////////////////////////////////   API   //////////////////////////////////////////////////
 
-    getMyAreas() {
+    getAreas() {
         var endpoint = `${this.apiBaseUrl}/geospatial/myareas`;
+        var userRole = localStorage.getItem('user-role');
+        if (userRole == 'admin-view') {
+            endpoint = `${this.apiBaseUrl}/geospatial/allareas`;
+        }       
         fetch(endpoint, this.createRequestObject('GET', null))
             .then(function (response) {
                 if (!response.ok) {
@@ -69,21 +72,6 @@
             })
             .then(() => {
                 this.eventObserver.broadcast(EventType.LAYER_DELETED, new GeoLayerModel(layerModel.Id, '', 0, ''));
-            })
-            .catch(err => this.handleApiError(err));
-    }
-
-    loadSettings(/* user Id */) {
-        var endpoint = `${this.apiBaseUrl}/user/mysettings`;
-        fetch(endpoint, this.createRequestObject('GET', null))
-            .then(function (response) {
-                if (!response.ok) {
-                    throw Error(response.statusText);
-                }
-                return response.json();
-            })
-            .then(settings => {
-                this.eventObserver.broadcast(EventType.SETTINGS_LOADED, new UserSettingsModel(settings.DefaultMapProvider));
             })
             .catch(err => this.handleApiError(err));
     }

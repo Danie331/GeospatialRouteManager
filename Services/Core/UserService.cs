@@ -1,8 +1,10 @@
 ﻿
 
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using DomainModels;
-using DomainModels.Settings;
 using Repository.Contract;
 using Services.Contract;
 
@@ -15,21 +17,27 @@ namespace Services.Core
         public UserService(IUserRepository userRepository)
         {
             _userRepository = userRepository;
+        }      
+
+        public async Task UpdateMySettingsAsync(User userWithSettings)
+        {
+            await _userRepository.UpdateMySettingsAsync(userWithSettings);
         }
 
-        public async Task<UserSettings> GetMySettingsAsync()
+        public async Task<User> AuthenticateAsync(Credentials credentials)
         {
-            return await _userRepository.GetMySettingsAsync();
-        }        
+            var user = await _userRepository.GetUserAsync(credentials.Username);
+            if (user == null)
+                return null;
 
-        public async Task UpdateMySettingsAsync(UserSettings settings)
-        {
-            await _userRepository.UpdateMySettingsAsync(settings);
-        }
+            using (var sha = new SHA512Managed())
+            {
+                var inputText = Encoding.UTF8.GetBytes(credentials.Password);
+                var textHash = sha.ComputeHash(inputText);
 
-        public Task<bool> AuthenticateAsync(Credentials credentials)
-        {
-            return Task.FromResult(credentials.Username == "adam" && credentials.Password == "qwerty123");
+                var authResult = user.PasswordHash.SequenceEqual(textHash);
+                return authResult ? user : null;
+            }
         }
     }
 }

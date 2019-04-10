@@ -14,6 +14,8 @@ class SettingsMenuView {
 
     render() {
         this.$container.append(this.content());
+        var defaultMapProvider = localStorage.getItem('default-map');
+        $("#mapProviderToggle").val(defaultMapProvider);
 
         return this;
     }
@@ -21,14 +23,12 @@ class SettingsMenuView {
     attachEventSubscribers() {
         this.eventBroker.subscribe(this.onSaveSettings.bind(this), EventType.BEFORE_SAVE_SETTINGS);
         this.eventBroker.subscribe(this.onSettingsSaved.bind(this), EventType.SETTINGS_SAVED);
-        this.eventBroker.subscribe(this.onSettingsLoaded.bind(this), EventType.SETTINGS_LOADED);
 
         return this;
     }
 
     attachHandlers() {
         $("#saveSettingsButton").click(() => this.eventBroker.broadcast(EventType.BEFORE_SAVE_SETTINGS, {}));
-        $("#refreshSettingsButton").click(() => location.reload());
 
         return this;
     }
@@ -44,11 +44,6 @@ class SettingsMenuView {
         $("#saveSettingsButton").val('Save Changes').removeAttr("disabled");
     }
 
-    onSettingsLoaded(userSettings) {
-        var defaultMapProvider = userSettings.DefaultMapProvider;
-        $("#mapProviderToggle").val(defaultMapProvider);
-    }
-
     content() {
         return `<div class='menu-margins'>
                     <span>
@@ -61,7 +56,6 @@ class SettingsMenuView {
                     <p />
                     <span>
                         <input id='saveSettingsButton' type='button' value='Save Changes' />
-                        <input id='refreshSettingsButton' class='float-right' type='button' value='Refresh Application' />
                     </span>
                 </div>`;
     }

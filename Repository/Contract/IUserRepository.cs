@@ -1,12 +1,12 @@
 ﻿
-using DomainModels.Settings;
+using DomainModels;
 using System.Threading.Tasks;
 
 namespace Repository.Contract
 {
     public interface IUserRepository
     {
-        Task<UserSettings> GetMySettingsAsync();
-        Task UpdateMySettingsAsync(UserSettings settings);
+        Task UpdateMySettingsAsync(User settings);
+        Task<User> GetUserAsync(string loginName);
     }
 }

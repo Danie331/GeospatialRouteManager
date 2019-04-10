@@ -9,6 +9,7 @@ namespace Repository.Contract
     {
         Task<GeoSpatialLayer> SaveGeoLayerAsync(GeoSpatialLayer layer);
         Task<List<GeoSpatialLayer>> GetMyAreasAsync();
+        Task<List<GeoSpatialLayer>> GetAllAreasAsync();
         Task<List<SearchSuburb>> FindSuburbsSimilarToAsync(string searchText);
         Task<List<SearchAddress>> FindAddressesWithStreetNumberAsync(string searchText, int suburbId);
         Task<List<SearchAddress>> FindAddressesContainingStringAsync(string searchText, int suburbId);

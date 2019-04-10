@@ -23,6 +23,8 @@ namespace Repository.DataContext
 
         public virtual DbSet<Address> Address { get; set; }
 
+        public virtual DbSet<User> User { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<SpatialArea>(entity =>
@@ -45,6 +47,9 @@ namespace Repository.DataContext
 
                 entity.Property(e => e.Deleted)
                 .HasColumnName("deleted");
+
+                entity.Property(e => e.UserId)
+                .HasColumnName("user_id");
             });
 
             modelBuilder.Entity<Setting>(entity =>
@@ -105,6 +110,17 @@ namespace Repository.DataContext
                     .HasColumnName("long_name")
                     .HasMaxLength(100)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("user");
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.UserName).HasColumnName("user_name");
+                entity.Property(e => e.UserSurname).HasColumnName("user_surname");
+                entity.Property(e => e.LoginName).HasColumnName("login_name");
+                entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
+                entity.Property(e => e.UpdatedDate).HasColumnName("updated_date");
             });
         }
     }

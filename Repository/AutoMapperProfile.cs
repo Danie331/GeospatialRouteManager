@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using DomainModels.Geospatial;
-using DomainModels.Settings;
 using GeoAPI.Geometries;
 using NetTopologySuite;
 using NetTopologySuite.Features;
@@ -21,7 +20,7 @@ namespace Repository
 
             CreateMap<DomainModels.Geospatial.GeoSpatialLayer, DataModels.SpatialArea>().ConvertUsing<GeoJsonToDataConvertor>();
 
-            CreateMap<List<DataModels.Setting>, DomainModels.Settings.UserSettings>().ConvertUsing<UserSettingsConvertor>();
+            CreateMap<DataModels.User, DomainModels.User>();
 
             CreateMap<DataModels.Suburb, DomainModels.Geospatial.SearchSuburb>().ForMember(s => s.FormattedName, a => a.MapFrom(e => e.LongName));
 
@@ -94,18 +93,6 @@ namespace Repository
                     Level = source.Level,
                     Id = source.Id,
                     GeoLayer = feature.Geometry
-                };
-            }
-        }
-
-        public class UserSettingsConvertor : ITypeConverter<List<DataModels.Setting>, DomainModels.Settings.UserSettings>
-        {
-            public UserSettings Convert(List<Setting> source, UserSettings destination, ResolutionContext context)
-            {
-                var defaultMapProvider = source.FirstOrDefault(s => s.SettingName == "DEFAULT_MAP_PROVIDER");
-                return new UserSettings
-                {
-                    DefaultMapProvider = defaultMapProvider?.SettingValue
                 };
             }
         }

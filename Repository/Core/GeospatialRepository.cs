@@ -7,16 +7,21 @@ using DomainModels.Geospatial;
 using Microsoft.EntityFrameworkCore;
 using Repository.DataContext;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace Repository.Core
 {
     public class GeospatialRepository : IGeospatialRepository
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly GeospatialContext _geospatialContext;
         private readonly IMapper _mapper;
 
-        public GeospatialRepository(GeospatialContext geospatialContext, IMapper mapper)
+        public GeospatialRepository(IHttpContextAccessor httpContextAccessor,
+            GeospatialContext geospatialContext,
+            IMapper mapper)
         {
+            _httpContextAccessor = httpContextAccessor;
             _geospatialContext = geospatialContext;
             _mapper = mapper;
         }
@@ -36,6 +41,7 @@ namespace Repository.Core
             }
             else
             {
+                dataDto.UserId = int.Parse(_httpContextAccessor.HttpContext.User.Identity.Name);
                 await _geospatialContext.SpatialArea.AddAsync(dataDto);
             }
 
@@ -44,6 +50,15 @@ namespace Repository.Core
         }
 
         public async Task<List<GeoSpatialLayer>> GetMyAreasAsync()
+        {
+            var userId = int.Parse(_httpContextAccessor.HttpContext.User.Identity.Name);
+            var spatialAreas = await _geospatialContext.SpatialArea.Where(s => s.UserId == userId && !s.Deleted).ToListAsync();
+            var areas = _mapper.Map<List<GeoSpatialLayer>>(spatialAreas);
+
+            return areas;
+        }
+
+        public async Task<List<GeoSpatialLayer>> GetAllAreasAsync()
         {
             var spatialAreas = await _geospatialContext.SpatialArea.Where(s => !s.Deleted).ToListAsync();
             var areas = _mapper.Map<List<GeoSpatialLayer>>(spatialAreas);

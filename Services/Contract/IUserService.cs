@@ -1,13 +1,12 @@
 ﻿
-using DomainModels.Settings;
+using DomainModels;
 using System.Threading.Tasks;
 
 namespace Services.Contract
 {
     public interface IUserService
     {
-        Task<UserSettings> GetMySettingsAsync();
-        Task UpdateMySettingsAsync(DomainModels.Settings.UserSettings settings);
-        Task<bool> AuthenticateAsync(DomainModels.Credentials credentials);
+        Task UpdateMySettingsAsync(DomainModels.User userWithSettings);
+        Task<User> AuthenticateAsync(DomainModels.Credentials credentials);
     }
 }

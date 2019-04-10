@@ -34,6 +34,12 @@ namespace Services.Core
             return areas.OrderBy(a => a.LayerName).ToList();
         }
 
+        public async Task<List<GeoSpatialLayer>> GetAllAreasAsync()
+        {
+            var areas = await _geospatialRepository.GetAllAreasAsync();
+            return areas.OrderBy(a => a.LayerName).ToList();
+        }
+
         public async Task DeleteGeoLayerAsync(GeoSpatialLayer layer)
         {
             if (layer.Id == 0)

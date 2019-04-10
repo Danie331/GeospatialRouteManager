@@ -10,5 +10,11 @@ namespace Api.ApiDto
         public string Username { get; set; }
         [JsonProperty("Token")]
         public string Token { get; set; }
+        [JsonProperty("UserId")]
+        public int UserId { get; set; }
+        [JsonProperty("DefaultMapProvider")]
+        public string DefaultMapProvider { get; set; }
+        [JsonProperty("UserRole")]
+        public string UserRole { get; set; }
     }
 }

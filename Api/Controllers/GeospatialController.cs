@@ -43,6 +43,14 @@ namespace Api.Controllers
             return _mapper.Map<List<ApiDto.GeoFeatureLayer>>(result);
         }
 
+        [HttpGet]
+        [Route("allareas")]
+        public async Task<List<ApiDto.GeoFeatureLayer>> GetAllAreas()
+        {
+            var result = await _geospatialService.GetAllAreasAsync();
+            return _mapper.Map<List<ApiDto.GeoFeatureLayer>>(result);
+        }
+
         [HttpPost]
         [Route("deletelayer")]
         public async Task DeleteGeoLayer(ApiDto.GeoFeatureLayer layer)

@@ -24,7 +24,6 @@ const EventType = {
     SAVE_SETTINGS: 'SAVE_SETTINGS',
     SETTINGS_SAVED: 'SETTINGS_SAVED',
     LOAD_SETTINGS: 'LOAD_SETTINGS',
-    SETTINGS_LOADED: 'SETTINGS_LOADED',
 
     // search events
     FIND_LOCATION: 'FIND_LOCATION',
@@ -61,7 +60,6 @@ class EventBroker {
             SAVE_SETTINGS: [],
             SETTINGS_SAVED: [],
             LOAD_SETTINGS: [],
-            SETTINGS_LOADED: [],
 
             FIND_LOCATION: [],
             SEARCH_SUBURBS: [],

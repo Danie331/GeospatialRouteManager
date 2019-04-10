@@ -23,6 +23,8 @@
                 data: $(this).serialize()
             }).done((result) => {
                 localStorage.setItem('access-token', result.Token);
+                localStorage.setItem('default-map', result.DefaultMapProvider);
+                localStorage.setItem('user-role', result.UserRole);
                 window.location = app.DEFAULT_PAGE;
                 }).fail(function (jqXHR, textStatus, error) {
                     if (error === "Unauthorized") {

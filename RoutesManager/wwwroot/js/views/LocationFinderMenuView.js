@@ -3,7 +3,6 @@ class LocationFinderMenuView {
     constructor(eventBroker) {
         this.$container = $('#locationFinderMenu');
         this.eventBroker = eventBroker;
-        this.settings = null;
         this.suburbsAutocompleteCallback = null;
         this.addressAutoCompleteCallback = null;
         this.sectionalTitleAutoCompleteCallback = null;
@@ -90,7 +89,6 @@ class LocationFinderMenuView {
     }
 
     attachEventSubscribers() {
-        this.eventBroker.subscribe(this.initSettings.bind(this), EventType.SETTINGS_LOADED);
         this.eventBroker.subscribe(this.onMapLoaded.bind(this), EventType.MAP_LOADED);
         this.eventBroker.subscribe(this.onSuburbsRetrieved.bind(this), EventType.SUBURBS_RETRIEVED);
         this.eventBroker.subscribe(this.onAddressesRetrieved.bind(this), EventType.ADDRESSES_RETRIEVED);
@@ -99,12 +97,9 @@ class LocationFinderMenuView {
         return this;
     }
 
-    initSettings(settings) {
-        this.settings = settings;
-    }
-
     onMapLoaded() {
-        if (this.settings.DefaultMapProvider === 'google') {
+        var defaultMapProvider = localStorage.getItem('default-map');
+        if (defaultMapProvider === 'google') {
             this.render();
             var autocomplete = new google.maps.places.Autocomplete(document.getElementById('googleSearchTextField'),
                 { strictBounds: true, componentRestrictions: { country: 'za' } });

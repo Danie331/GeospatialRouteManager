@@ -11,15 +11,17 @@ class MapViewController {
     init() {
         this.attachHandlers();
         this.attachEventListeners();
-    }
-
-    onSettingsLoaded(userSettings) {
-        switch (userSettings.DefaultMapProvider) {
+        
+        var defaultMapProvider = localStorage.getItem('default-map');
+        switch (defaultMapProvider) {
             case 'google':
                 this.mapProvider = new GoogleMapView(this, this.eventBroker);
                 break;
             case 'leaflet':
                 this.mapProvider = new LeafletMapView(this, this.eventBroker);
+                break;
+            default:
+                this.mapProvider = new GoogleMapView(this, this.eventBroker);
                 break;
         }
     }
@@ -33,7 +35,6 @@ class MapViewController {
         this.eventBroker.subscribe(this.onGeoLayerSaving.bind(this), EventType.BEFORE_SAVE_LAYER);
         this.eventBroker.subscribe(this.onGeoLayerSaved.bind(this), EventType.LAYER_SAVED);
         this.eventBroker.subscribe(this.onLayerClick.bind(this), EventType.CLICK_LAYER);
-        this.eventBroker.subscribe(this.onSettingsLoaded.bind(this), EventType.SETTINGS_LOADED);
         this.eventBroker.subscribe(this.onMapLoaded.bind(this), EventType.AFTER_LAYERS_SHOWN);
         this.eventBroker.subscribe(this.onW3wRetrieved.bind(this), EventType.W3W_RETRIEVED);
     }
@@ -92,6 +93,7 @@ class MapViewController {
     }
 
     getGeoLayerPopupContent(geoLayer) {
+        var userRole = localStorage.getItem('user-role');
         return `<div>
                     <span>
                         <div class='info-window-item-row'>
@@ -103,8 +105,10 @@ class MapViewController {
                             ${this.renderLayerLevelSetting(geoLayer)}
                         </div>
                         <p />
-                        <input class='saveGeoLayerButton' type='button' value='Save' />
-                        <input class='deleteGeoLayerButton' type='button' value='Delete Layer' />
+                        ${userRole !== "admin-view" ?
+                "<input class='saveGeoLayerButton' type='button' value='Save' /> \
+                                             <input class='deleteGeoLayerButton' type='button' value='Delete Layer' />"
+                : ""}
                     </span>
                 </div>`;
     }

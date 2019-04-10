@@ -8,6 +8,7 @@ namespace Services.Contract
     {
         Task<GeoSpatialLayer> SaveGeoLayerAsync(GeoSpatialLayer layer);
         Task<List<GeoSpatialLayer>> GetMyAreasAsync();
+        Task<List<GeoSpatialLayer>> GetAllAreasAsync();
         Task<GeoLocation> GetLocationAsync(GeoLocation location);
         Task<List<SearchSuburb>> GetMatchingSuburbsAsync(string searchText);
         Task<List<SearchAddress>> GetMatchingAddressesAsync(string searchText, int suburbId);

@@ -26,19 +26,11 @@ namespace Api.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
-        [Route("mysettings")]
-        public async Task<ApiDto.UserSettings> GetMySettings()
-        {
-            var settings = await _userService.GetMySettingsAsync();
-            return _mapper.Map<ApiDto.UserSettings>(settings);
-        }
-
         [HttpPost]
         [Route("updatesettings")]
-        public async Task UpdateSettings(ApiDto.UserSettings settingsDto)
+        public async Task UpdateSettings(ApiDto.User settingsDto)
         {
-            var userSettings = _mapper.Map<DomainModels.Settings.UserSettings>(settingsDto);
+            var userSettings = _mapper.Map<DomainModels.User>(settingsDto);
             await _userService.UpdateMySettingsAsync(userSettings);
         }
 
@@ -48,8 +40,8 @@ namespace Api.Controllers
         public async Task<IActionResult> Login([FromForm]ApiDto.Credentials credentialsDto)
         {
             var credentials = _mapper.Map<DomainModels.Credentials>(credentialsDto);
-            var result = await _userService.AuthenticateAsync(credentials);
-            if (!result)
+            var user = await _userService.AuthenticateAsync(credentials);
+            if (user == null)
             {
                 return StatusCode(401);
             }
@@ -58,21 +50,16 @@ namespace Api.Controllers
             var key = Encoding.ASCII.GetBytes("Xp2s5v8x/A?D(G+KbPeShVmYq3t6w9z$B&E)H@McQfTjWnZr4u7x!A%D*F-JaNdR");
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, credentialsDto.Username)
-                }),
+                Subject = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, user.UserId.ToString()) }),
                 Expires = DateTime.UtcNow.AddDays(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
 
-            return Ok(new ApiDto.User
-            {
-                Token = tokenString,
-                Username = credentialsDto.Username
-            });
+            var userDto = _mapper.Map<ApiDto.User>(user);
+            userDto.Token = tokenString;
+            return Ok(userDto);
         }
     }
 }

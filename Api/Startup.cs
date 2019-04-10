@@ -60,6 +60,7 @@ namespace Api
             });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddHttpContextAccessor();
             services.RegisterServices(Configuration);
             services.AddAutoMapper(GetType().Assembly, typeof(Repository.AutoMapperProfile).Assembly);
         }
