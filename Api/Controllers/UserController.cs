@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Services.Contract;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -24,15 +25,7 @@ namespace Api.Controllers
         {
             _userService = userService;
             _mapper = mapper;
-        }
-
-        [HttpPost]
-        [Route("updatesettings")]
-        public async Task UpdateSettings(ApiDto.User settingsDto)
-        {
-            var userSettings = _mapper.Map<DomainModels.User>(settingsDto);
-            await _userService.UpdateMySettingsAsync(userSettings);
-        }
+        }        
 
         [HttpPost]
         [AllowAnonymous]
@@ -60,6 +53,32 @@ namespace Api.Controllers
             var userDto = _mapper.Map<ApiDto.User>(user);
             userDto.Token = tokenString;
             return Ok(userDto);
+        }
+
+        [HttpGet]
+        [Route("tags")]
+        public async Task<List<ApiDto.MetaTag>> GetMyTags()
+        {
+            var result = await _userService.GetMyTagsAsync();
+            return _mapper.Map<List<ApiDto.MetaTag>>(result);
+        }
+
+        [HttpPost]
+        [Route("savetags")]
+        public async Task<List<ApiDto.MetaTag>> SaveMyTags([FromBody]List<ApiDto.MetaTag> userTagsDto)
+        {
+            var userTags = _mapper.Map<List<DomainModels.MetaTag>>(userTagsDto);
+            var updatedTags = await _userService.SaveMyTagsAsync(userTags);
+            var result = _mapper.Map<List<ApiDto.MetaTag>>(updatedTags);
+            return result;
+        }
+
+        [HttpPost]
+        [Route("updatesettings")]
+        public async Task UpdateSettings(ApiDto.User settingsDto)
+        {
+            var userSettings = _mapper.Map<DomainModels.User>(settingsDto);
+            await _userService.UpdateMySettingsAsync(userSettings);
         }
     }
 }

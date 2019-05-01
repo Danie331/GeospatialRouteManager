@@ -27,8 +27,10 @@ class GoogleMapView {
         this.eventBroker.subscribe(this.onLayerSaved.bind(this), EventType.LAYER_SAVED);
         this.eventBroker.subscribe(this.afterLayersLoaded.bind(this), EventType.AFTER_LAYERS_SHOWN);
         this.eventBroker.subscribe(this.onSelectLayer.bind(this), EventType.SELECT_LAYER);
-        this.eventBroker.subscribe(this.toggleLayers.bind(this), EventType.TOGGLE_LAYERS);
+        this.eventBroker.subscribe(this.togglePublicLayers.bind(this), EventType.TOGGLE_PUBLIC_LAYERS);
+        this.eventBroker.subscribe(this.togglePrivateLayers.bind(this), EventType.TOGGLE_PRIVATE_LAYERS);
         this.eventBroker.subscribe(this.plotLocationMarker.bind(this), EventType.PLOT_LOCATION);
+        this.eventBroker.subscribe(this.handleSwitchMenus.bind(this), EventType.TOGGLE_MENU, Ordinality.Highest);
 
         return this;
     }
@@ -97,7 +99,9 @@ class GoogleMapView {
                 properties: { Id: 0 },
                 geometry: wktPoly.toJson()
             });
-            var layerModel = new GeoLayerModel(0, '', 0, geoJson);
+
+            var userId = localStorage.getItem('user-id');
+            var layerModel = new GeoLayerModel(0, '', geoJson, null, null, userId);
             context.layerCache.push(layerModel);
             var layerGeojson = JSON.parse(layerModel.Geojson);
             context.map.data.addGeoJson(layerGeojson, { idPropertyName: "Id" });
@@ -115,7 +119,7 @@ class GoogleMapView {
         this.eventBroker.broadcast(EventType.AFTER_LAYERS_SHOWN, {});
     }
 
-    toggleLayers(selectedLevels) {
+    togglePublicLayers(selectedLevels) {
         this.unselectActiveLayer();
 
         this.map.data.forEach(feature => {
@@ -127,7 +131,35 @@ class GoogleMapView {
         this.addFeatureEventHandlerInstance = null;
 
         var filteredLayers = _.filter(this.layerCache, layer => {
-            return _.includes(selectedLevels, layer.Level);
+            return _.includes(selectedLevels, layer.PublicTag.TagValue);
+        });
+        filteredLayers.forEach(layerModel => {
+            var layerGeojson = JSON.parse(layerModel.Geojson);
+            this.map.data.addGeoJson(layerGeojson, { idPropertyName: "Id" });
+        });
+        this.eventBroker.broadcast(EventType.AFTER_LAYERS_SHOWN, {});
+    }
+
+    togglePrivateLayers(tags) {
+        this.unselectActiveLayer();
+
+        this.map.data.forEach(feature => {
+            this.map.data.remove(feature);
+        });
+
+        // Remove the event handler listening for new features/layers.
+        if (this.addFeatureEventHandlerInstance) {
+            this.addFeatureEventHandlerInstance.remove();
+        }
+        this.addFeatureEventHandlerInstance = null;
+        var userId = localStorage.getItem('user-id');
+        var filteredLayers = _.filter(this.layerCache, layer => {
+            var userIsOwner = !layer.UserId || (userId == layer.UserId);
+            var canIncludeLayer = true;
+            if (tags && tags.length) {
+                canIncludeLayer = layer.UserTag && _.some(tags, e => e.TagValue !== '' && e.TagValue == layer.UserTag.TagValue);
+            }
+            return userIsOwner && canIncludeLayer;
         });
         filteredLayers.forEach(layerModel => {
             var layerGeojson = JSON.parse(layerModel.Geojson);
@@ -142,22 +174,33 @@ class GoogleMapView {
     }
 
     unselectActiveLayer() {
-        this.infowindow.close();
+        if (this.infowindow) {
+            this.infowindow.close();
+        }
         if (this.selectedLayer) {
             this.map.data.overrideStyle(this.selectedLayer, { editable: false });
             if (this.selectedLayer.getProperty("Id") == 0) {
                 this.map.data.remove(this.selectedLayer);
+                _.remove(this.layerCache, x => x.Id == 0);
             }
+            this.selectedLayer = null;
         }
     }
 
-    handleLayerClick(feature) {
+    handleLayerClick(feature) {       
         this.unselectActiveLayer();
         this.selectedLayer = feature;
-        this.map.data.overrideStyle(this.selectedLayer, { editable: true });
         var id = this.selectedLayer.getProperty("Id");
         var targetLayer = this.layerCache.find(x => x.Id == id);
-        var layerModel = new GeoLayerModel(targetLayer.Id, targetLayer.LayerName, targetLayer.Level, '');
+        if (!targetLayer) {
+            return; // NB.: return in this instance due to indeterminate order of firing of google events.
+        }
+
+        var userId = localStorage.getItem('user-id');
+        var userIsOwner = !targetLayer.UserId || (userId == targetLayer.UserId);
+
+        this.map.data.overrideStyle(this.selectedLayer, { editable: userIsOwner });
+        var layerModel = new GeoLayerModel(targetLayer.Id, targetLayer.LayerName, '', targetLayer.PublicTag, targetLayer.UserTag, targetLayer.UserId);
 
         var content = this.viewController.getGeoLayerPopupContent(layerModel);
         var polyCoords = feature.getGeometry().getAt(0).getArray();
@@ -175,19 +218,21 @@ class GoogleMapView {
             var id = this.selectedLayer.getProperty("Id");
             var targetLayer = this.layerCache.find(x => x.Id == id);
             targetLayer.Geojson = json;
-            var model = new GeoLayerModel(id, layerModel.LayerName, layerModel.Level, targetLayer.Geojson);
+            var model = new GeoLayerModel(id, layerModel.LayerName, targetLayer.Geojson, layerModel.PublicTag, layerModel.UserTag);
             this.eventBroker.broadcast(EventType.SAVE_LAYER, model);
         });
     }
 
     onDeleteLayer() {
         var id = this.selectedLayer.getProperty("Id");
-        var model = new GeoLayerModel(id, '', 0, '');
+        var model = new GeoLayerModel(id, '', '', null, null);
         this.eventBroker.broadcast(EventType.DELETE_LAYER, model);
     }
 
     onLayerDeleted(model) {
-        this.unselectActiveLayer();
+        if (this.infowindow) {
+            this.infowindow.close();
+        }
         this.map.data.remove(this.selectedLayer);
         _.remove(this.layerCache, layer => layer.Id === model.Id);
 
@@ -206,8 +251,10 @@ class GoogleMapView {
 
         targetLayer.Id = model.Id;
         targetLayer.LayerName = model.LayerName;
-        targetLayer.Level = model.Level;
+        targetLayer.PublicTag = model.PublicTag;
+        targetLayer.UserTag = model.UserTag;
         targetLayer.Geojson = model.Geojson;
+        targetLayer.UserId = model.UserId;
     }
 
     calcCentroid(polyPoints) {
@@ -271,5 +318,9 @@ class GoogleMapView {
         if (!geoLocationModel.What3Words) {
             this.eventBroker.broadcast(EventType.FIND_3_WORDS, geoLocationModel);
         } 
+    }
+
+    handleSwitchMenus() {
+        this.unselectActiveLayer();
     }
 }

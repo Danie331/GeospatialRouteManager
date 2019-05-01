@@ -6,6 +6,7 @@ using Repository.Contract;
 using Repository.DataContext;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Repository.Core
 {
@@ -50,6 +51,47 @@ namespace Repository.Core
                 targetSetting.SettingValue = userWithSettings.DefaultMapProvider;
                 await _geospatialContext.SaveChangesAsync();
             }
+        }
+
+        public int GetCurrentUserId()
+        {
+            var userId = int.Parse(_httpContextAccessor.HttpContext.User.Identity.Name);
+            return userId;
+        }
+
+        public async Task<List<MetaTag>> GetUserTagsAsync()
+        {
+            var userId = int.Parse(_httpContextAccessor.HttpContext.User.Identity.Name);
+            var tagRecords = await _geospatialContext.UserTag.Where(u => u.UserId == userId && u.TagValue != string.Empty)
+                                                             .GroupBy(gr => gr.TagValue).Select(r => r.First()).ToListAsync();
+            return _mapper.Map<List<MetaTag>>(tagRecords);
+        }
+
+        public async Task SaveUserTagsAsync(List<MetaTag> userTags)
+        {
+            var userId = int.Parse(_httpContextAccessor.HttpContext.User.Identity.Name);            
+            var existingTags = await _geospatialContext.UserTag.Where(s => s.UserId == userId).ToListAsync();
+            foreach (var tag in userTags)
+            {
+                // cases
+                // 1. If incoming tag doesnt exist, create it
+                // 2. If existing tag not one of incoming tags, delete it and nullify all layers associated
+                var tagExists = existingTags.FirstOrDefault(t => t.TagValue.ToLower() == tag.TagValue.ToLower());
+                if (tagExists == null)
+                {
+                    var dataTag = _mapper.Map<DataModels.UserTag>(tag);
+                    dataTag.UserId = GetCurrentUserId();
+                    await _geospatialContext.UserTag.AddAsync(dataTag);
+                }
+            }
+            var tagsToRemove = existingTags.Where(t => !userTags.Any(t2 => t2.TagValue.ToLower() == t.TagValue.ToLower()));
+            foreach (var item in tagsToRemove)
+            {
+                item.TagName = item.TagValue;
+                item.TagValue = string.Empty;
+            }
+
+            await _geospatialContext.SaveChangesAsync();
         }
     }
 }

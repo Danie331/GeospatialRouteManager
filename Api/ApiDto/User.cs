@@ -16,5 +16,7 @@ namespace Api.ApiDto
         public string DefaultMapProvider { get; set; }
         [JsonProperty("UserRole")]
         public string UserRole { get; set; }
+        [JsonProperty("FriendlyName")]
+        public string FriendlyName { get; set; }
     }
 }

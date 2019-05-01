@@ -10,9 +10,12 @@
 
         new MapViewController(eventBroker);
 
-        app.createMenu();
+        app.createMenu(eventBroker);
     });
 
-    app.createMenu = () => $(".slide-menu").slidemenu();
+    app.createMenu = (eventBroker) => {
+        $("#myLayersText").text(`My Layers (${localStorage.getItem('user-friendly-name')})`);
+        $(".slide-menu").slidemenu({ EventBroker: eventBroker });
+    }
 
 })(app);

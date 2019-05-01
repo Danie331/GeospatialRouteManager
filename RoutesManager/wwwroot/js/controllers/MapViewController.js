@@ -4,6 +4,7 @@ class MapViewController {
         this.$container = $("#map");
         this.eventBroker = eventBroker;
         this.mapProvider = null;
+        this.userTagsCache = null;
 
         this.init();
     }
@@ -35,8 +36,10 @@ class MapViewController {
         this.eventBroker.subscribe(this.onGeoLayerSaving.bind(this), EventType.BEFORE_SAVE_LAYER);
         this.eventBroker.subscribe(this.onGeoLayerSaved.bind(this), EventType.LAYER_SAVED);
         this.eventBroker.subscribe(this.onLayerClick.bind(this), EventType.CLICK_LAYER);
-        this.eventBroker.subscribe(this.onMapLoaded.bind(this), EventType.AFTER_LAYERS_SHOWN);
+        this.eventBroker.subscribe(this.onLayersShown.bind(this), EventType.AFTER_LAYERS_SHOWN);
         this.eventBroker.subscribe(this.onW3wRetrieved.bind(this), EventType.W3W_RETRIEVED);
+        this.eventBroker.subscribe(this.onTagsLoaded.bind(this), EventType.TAGS_LOADED);
+        this.eventBroker.subscribe(this.onTagsSaved.bind(this), EventType.TAGS_SAVED);
     }
 
     saveGeoLayerClickHandler() {
@@ -45,10 +48,21 @@ class MapViewController {
             layerNameInput.focus();
             return;
         }
-        var layerLevel = $(".layerLevelSelect").val();
 
-        var layerModel = new GeoLayerModel(0, layerNameInput.val(), layerLevel, '');
+        var layerLevel = $(".layerLevelSelect").val();
+        var userTagValue = $(".userTagSelector").children("option:selected").val();
+        var publicTag = new PublicTagModel(`Level ${layerLevel}`, layerLevel);
+        var userTag = new UserTagModel('user-tag', userTagValue);
+        var layerModel = new GeoLayerModel(0, layerNameInput.val(), '', publicTag, userTag);
         this.eventBroker.broadcast(EventType.BEFORE_SAVE_LAYER, layerModel);
+    }
+
+    onTagsSaved(userTagsCollection) {
+        this.userTagsCache = userTagsCollection;
+    }
+
+    onTagsLoaded(userTagsCollection) {
+        this.userTagsCache = userTagsCollection;
     }
 
     deleteGeoLayerClickHandler() {
@@ -83,9 +97,12 @@ class MapViewController {
     }
 
     renderLayerLevelSetting(geoLayer) {
-        var levelSetting = "<select class='layerLevelSelect'>";
-        [{ Id: 1, Name: '1' }, { Id: 2, Name: '2' }, { Id: 3, Name: '3' }].forEach(level => {
-            var selected = level.Id == geoLayer.Level ? 'selected' : '';
+        var userId = localStorage.getItem('user-id');
+        var userIsOwner = !geoLayer.UserId || (userId == geoLayer.UserId);
+
+        var levelSetting = `<select class='layerLevelSelect' ${!userIsOwner ? "disabled" : ""}>`;
+        [{ Id: '1', Name: '1' }, { Id: '2', Name: '2' }, { Id: '3', Name: '3' }].forEach(level => {
+            var selected = level.Id == (geoLayer.PublicTag ? geoLayer.PublicTag.TagValue : '') ? 'selected' : '';
             var option = `<option value='${level.Id}' ${selected}>${level.Name}</option>`;
             levelSetting += option;
         });
@@ -93,19 +110,23 @@ class MapViewController {
     }
 
     getGeoLayerPopupContent(geoLayer) {
-        var userRole = localStorage.getItem('user-role');
+        var userId = localStorage.getItem('user-id');
+        var userIsOwner = !geoLayer.UserId || (userId == geoLayer.UserId); // user can edit if they own the area (userId undefined if new)
         return `<div>
                     <span>
                         <div class='info-window-item-row'>
                             <label>Layer name: </label>
-                            <input class='layerNameInput' type='text' value='${geoLayer.LayerName ? geoLayer.LayerName : ''}' />
+                            <input class='layerNameInput' type='text' value='${geoLayer.LayerName ? geoLayer.LayerName : ''}' ${!userIsOwner ? "disabled" : ""} />
                         </div>
                         <div class='info-window-item-row'>
                             <label>Priority level: </label>
                             ${this.renderLayerLevelSetting(geoLayer)}
                         </div>
+                        <div class='info-window-item-row'>                                                      
+                            ${this.renderUserTagOptions(geoLayer)}
+                        </div>
                         <p />
-                        ${userRole !== "admin-view" ?
+                        ${userIsOwner ?
                 "<input class='saveGeoLayerButton' type='button' value='Save' /> \
                                              <input class='deleteGeoLayerButton' type='button' value='Delete Layer' />"
                 : ""}
@@ -140,7 +161,34 @@ class MapViewController {
         }
     }
 
-    onMapLoaded() {
+    onLayersShown() {
+        this.eventBroker.unsubscribe(this.onLayersShown.bind(this), EventType.AFTER_LAYERS_SHOWN);
+        // As per the default selected menu item
+        this.eventBroker.broadcast(EventType.TOGGLE_MENU, { Menu: "layersMenu" });
         $.unblockUI();
+    }
+
+    renderUserTagOptions(geoLayer) {
+        var userId = localStorage.getItem('user-id');
+        var userIsOwner = !geoLayer.UserId || (userId == geoLayer.UserId);
+        if (!userIsOwner)
+            return "";
+        var userTag = this.getUserTagValueFromLayer(geoLayer);
+
+        var html = $(`<select class='userTagSelector' ${!userIsOwner ? "disabled" : ""} />`);
+        html.append($("<option></option>").attr("value", "").text(""));
+        this.userTagsCache.forEach(ut => {
+            var selected = ut.TagValue === userTag ? 'selected' : '';
+            html.append($(`<option ${selected}></option>`).attr("value", ut.TagValue).text(ut.TagValue)); 
+        });
+        return `<label>Tag: </label> ${html.prop('outerHTML')}`;
+    }
+
+    getUserTagValueFromLayer(layer) {
+        if (layer.UserTag && this.userTagsCache) {
+            var existingTag = this.userTagsCache.find(x => x.TagValue == layer.UserTag.TagValue);
+            return existingTag ? existingTag.TagValue : "";
+        }
+        return "";
     }
 }

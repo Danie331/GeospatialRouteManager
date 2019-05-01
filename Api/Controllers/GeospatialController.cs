@@ -6,10 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Contract;
 
-// TODO:
-// 1. Add logging
-// 2. Add security
-// 3. Add bundling + minification
 namespace Api.Controllers
 {
     [Authorize]

@@ -34,7 +34,7 @@ input[type=button] {
     float: right;
 }
 
-#layersListContainer {
+.layer-item-list {
     list-style-type: none;
     list-style-position: inside;
     padding: 10px;
@@ -73,6 +73,11 @@ input[type=button] {
 
     .info-window-item-row > input {
         width: 280px;
+        display: inline-block;
+    }
+
+    .info-window-item-row > select {
+        width: 200px;
         display: inline-block;
     }
 
@@ -176,4 +181,8 @@ input[type=button] {
 .deleteGeoLayerButton {
     display: inline-block;
     float: right;
+}
+
+.user-tag-selector {
+    width: 100%;
 }

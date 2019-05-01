@@ -114,6 +114,12 @@ Slide Menu
            // do nothing
         } else if ($(event.currentTarget).parents(".slide-menu").hasClass(CLASSES.ACTIVE)) { //Close open menu and move new menu into place
             instance.switchMenus(event, instance);
+            // Dispatch an EventBroker event
+            if ($(event.currentTarget).find("#layersMenu").length) {
+                instance.options.EventBroker.broadcast(EventType.TOGGLE_MENU, { Menu: "layersMenu" });
+            } else if ($(event.currentTarget).find("#allLayersMenu").length) {
+                instance.options.EventBroker.broadcast(EventType.TOGGLE_MENU, { Menu: "allLayersMenu" });
+            }
         } else { //Open the menu that was selected
             instance.openMenu(event, instance);
         }

@@ -10,5 +10,6 @@ namespace DomainModels
         public string DefaultMapProvider { get; set; }
         public string UserRole { get; set; }
         public byte[] PasswordHash { get; set; }
+        public string FriendlyName { get; set; }
     }
 }

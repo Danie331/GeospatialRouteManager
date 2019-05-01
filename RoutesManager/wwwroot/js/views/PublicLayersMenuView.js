@@ -1,7 +1,7 @@
 ﻿
-class GeoLayersMenuView {
+class PublicLayersMenuView {
     constructor(eventBroker) {
-        this.$container = $('#layersMenu');
+        this.$container = $('#allLayersMenu');
         this.eventBroker = eventBroker;
         this.layersCache = null;
 
@@ -28,7 +28,7 @@ class GeoLayersMenuView {
             }
 
             var selectedLevels = this.getSelectedLevels();
-            this.eventBroker.broadcast(EventType.TOGGLE_LAYERS, selectedLevels);
+            this.eventBroker.broadcast(EventType.TOGGLE_PUBLIC_LAYERS, selectedLevels);
         });
 
         return this;
@@ -37,17 +37,18 @@ class GeoLayersMenuView {
     attachEventSubscribers() {
         this.eventBroker.subscribe(this.onLayersLoaded.bind(this), EventType.LAYERS_LOADED);
         this.eventBroker.subscribe(this.onLayerSaved.bind(this), EventType.LAYER_SAVED);
-        this.eventBroker.subscribe(this.toggleSelectableLayers.bind(this), EventType.TOGGLE_LAYERS);
+        this.eventBroker.subscribe(this.toggleSelectableLayers.bind(this), EventType.TOGGLE_PUBLIC_LAYERS);
+        this.eventBroker.subscribe(this.handleShowLayers.bind(this), EventType.TOGGLE_MENU);
         this.eventBroker.subscribe(this.onLayerDeleted.bind(this), EventType.LAYER_DELETED);
 
         return this;
     }
 
     getSelectedLevels() {
-        var all = $('.showAllLayersCheckbox').is(':checked') ? [1, 2, 3] : [];
-        var layer1 = $('.showLevel1Checkbox').is(':checked') ? [1] : [];
-        var layer2 = $('.showLevel2Checkbox').is(':checked') ? [2] : [];
-        var layer3 = $('.showLevel3Checkbox').is(':checked') ? [3] : [];
+        var all = $('.showAllLayersCheckbox').is(':checked') ? ['1', '2', '3'] : [];
+        var layer1 = $('.showLevel1Checkbox').is(':checked') ? ['1'] : [];
+        var layer2 = $('.showLevel2Checkbox').is(':checked') ? ['2'] : [];
+        var layer3 = $('.showLevel3Checkbox').is(':checked') ? ['3'] : [];
 
         return _.union([...all, ...layer1, ...layer2, ...layer3]);
     }
@@ -76,7 +77,7 @@ class GeoLayersMenuView {
 
     toggleSelectableLayers(levelsToShow) {
         var filteredLayers = _.filter(this.layersCache, layer => {
-            return _.includes(levelsToShow, layer.Level);
+            return _.includes(levelsToShow, layer.PublicTag.TagValue);
         });
         this.updateLayersSelection(filteredLayers);
     }
@@ -97,6 +98,13 @@ class GeoLayersMenuView {
                 .attr('data-layerid', layerModel.Id));
     }
 
+    handleShowLayers(menuNameContainer) {
+        if (menuNameContainer.Menu === 'allLayersMenu') {
+            var selectedLevels = this.getSelectedLevels();
+            this.eventBroker.broadcast(EventType.TOGGLE_PUBLIC_LAYERS, selectedLevels);
+        }
+    }
+
     content() {
         return `<div>
                     <div id='layerLevelSelector' class='menu-margins'>
@@ -110,7 +118,7 @@ class GeoLayersMenuView {
                     </div>
                     <p />
                     <div class='menu-margins menu-content-vh'>
-                        <ul id='layersListContainer'></ul>
+                        <ul id='layersListContainer' class='layer-item-list'></ul>
                     </div>
                 </div>`;
     }

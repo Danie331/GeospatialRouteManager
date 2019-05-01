@@ -20,16 +20,18 @@
         this.eventObserver.subscribe(this.suburbsSearch.bind(this), EventType.SEARCH_SUBURBS);
         this.eventObserver.subscribe(this.addressesSearch.bind(this), EventType.SEARCH_ADDRESSES);
         this.eventObserver.subscribe(this.sectionalTitleSearch.bind(this), EventType.SEARCH_SECTIONAL_TITLES);
+        this.eventObserver.subscribe(this.getUserTags.bind(this), EventType.LOAD_USER_TAGS);
+        this.eventObserver.subscribe(this.saveUserTags.bind(this), EventType.SAVE_TAGS);
     }
 
     /////////////////////////////////////////////   API   //////////////////////////////////////////////////
 
     getAreas() {
-        var endpoint = `${this.apiBaseUrl}/geospatial/myareas`;
-        var userRole = localStorage.getItem('user-role');
-        if (userRole == 'admin-view') {
-            endpoint = `${this.apiBaseUrl}/geospatial/allareas`;
-        }       
+        var endpoint = `${this.apiBaseUrl}/geospatial/allareas`;
+        //var userRole = localStorage.getItem('user-role');
+        //if (userRole == 'admin-view') {
+        //    endpoint = `${this.apiBaseUrl}/geospatial/allareas`;
+        //}       
         fetch(endpoint, this.createRequestObject('GET', null))
             .then(function (response) {
                 if (!response.ok) {
@@ -40,7 +42,7 @@
             .then(areas => {
                 var areaLayerList = [];
                 areas.forEach(areaLayer => {
-                    areaLayerList.push(new GeoLayerModel(areaLayer.Id, areaLayer.LayerName, areaLayer.Level, areaLayer.Geojson));
+                    areaLayerList.push(new GeoLayerModel(areaLayer.Id, areaLayer.LayerName, areaLayer.Geojson, areaLayer.PublicTag, areaLayer.UserTag, areaLayer.UserId));
                 });
                 this.eventObserver.broadcast(EventType.LAYERS_LOADED, areaLayerList);
             })
@@ -57,7 +59,7 @@
                 return response.json();
             })
             .then(res => {
-                this.eventObserver.broadcast(EventType.LAYER_SAVED, new GeoLayerModel(res.Id, res.LayerName, res.Level, res.Geojson));
+                this.eventObserver.broadcast(EventType.LAYER_SAVED, new GeoLayerModel(res.Id, res.LayerName, res.Geojson, res.PublicTag, res.UserTag, res.UserId));
             })
             .catch(err => this.handleApiError(err));
     }
@@ -71,7 +73,7 @@
                 }
             })
             .then(() => {
-                this.eventObserver.broadcast(EventType.LAYER_DELETED, new GeoLayerModel(layerModel.Id, '', 0, ''));
+                this.eventObserver.broadcast(EventType.LAYER_DELETED, new GeoLayerModel(layerModel.Id, '', '', null, null));
             })
             .catch(err => this.handleApiError(err));
     }
@@ -166,8 +168,45 @@
             .catch(err => this.handleApiError(err));
     }
 
+    getUserTags() {
+        var endpoint = `${this.apiBaseUrl}/user/tags`;
+        fetch(endpoint, this.createRequestObject('GET', null))
+            .then(function (response) {
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                }
+                return response.json();
+            })
+            .then(tagsCollection => {
+                this.eventObserver.broadcast(EventType.TAGS_LOADED, tagsCollection); // List of UserTagModel.js
+            })
+            .catch(err => this.handleApiError(err));
+    }
+
+    saveUserTags(userTagsCollection) {
+        var endpoint = `${this.apiBaseUrl}/user/savetags`;
+        fetch(endpoint, this.createRequestObject('POST', userTagsCollection))
+            .then(function (response) {
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                }
+                return response.json();
+            })
+            .then(userTagsCollection => {
+                this.eventObserver.broadcast(EventType.TAGS_SAVED, userTagsCollection);
+            })
+            .catch(err => this.handleApiError(err));
+    }
+
     createRequestObject(method, model) {
-        var body = model != null ? model.toString() : null;
+        var body = null;
+        if (model != null) {
+            if (Array.isArray(model)) {
+                body = JSON.stringify(model);
+            } else {
+                body = model.toString();
+            }
+        }
         var headers = new Headers();
         headers.append("Content-Type", 'application/json');
         headers.append("Authorization", `Bearer ${localStorage.getItem('access-token')}`);

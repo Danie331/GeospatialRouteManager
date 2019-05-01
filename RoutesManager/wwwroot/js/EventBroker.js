@@ -1,11 +1,17 @@
 ﻿
+// Use ordinality to indicate the order of execution for event subscribers
+// If multiple subscribers require the same ordinality for a given event type, create a new event type instead
+const Ordinality = {
+    Highest: 1 // subscriber will be executed first [for this event type]
+};
+
 const EventType = {
     // layer/drawing events
     BEFORE_SAVE_LAYER: 'BEFORE_SAVE_LAYER',
     SAVE_LAYER: 'SAVE_LAYER',
     LAYER_SAVED: 'LAYER_SAVED',
     CLICK_LAYER: 'CLICK_LAYER',
-    SELECT_LAYER: 'SELECT_LAYER', 
+    SELECT_LAYER: 'SELECT_LAYER',
     BEFORE_DELETE_LAYER: 'BEFORE_DELETE_LAYER',
     DELETE_LAYER: 'DELETE_LAYER',
     LAYER_DELETED: 'LAYER_DELETED',
@@ -16,8 +22,14 @@ const EventType = {
 
     // menu events
     LAYERS_LOADED: 'LAYERS_LOADED',
-    AFTER_LAYERS_SHOWN: 'AFTER_LAYERS_SHOWN', 
-    TOGGLE_LAYERS: 'TOGGLE_LAYERS',
+    AFTER_LAYERS_SHOWN: 'AFTER_LAYERS_SHOWN',
+    TOGGLE_PUBLIC_LAYERS: 'TOGGLE_PUBLIC_LAYERS',
+    TOGGLE_PRIVATE_LAYERS: 'TOGGLE_PRIVATE_LAYERS',
+    TOGGLE_MENU: 'TOGGLE_MENU',
+    LOAD_USER_TAGS: 'LOAD_USER_TAGS', 
+    TAGS_LOADED: 'TAGS_LOADED',
+    SAVE_TAGS: 'SAVE_TAGS', 
+    TAGS_SAVED: 'TAGS_SAVED',
 
     // settings
     BEFORE_SAVE_SETTINGS: 'BEFORE_SAVE_SETTINGS',
@@ -54,7 +66,13 @@ class EventBroker {
 
             LAYERS_LOADED: [],
             AFTER_LAYERS_SHOWN: [],
-            TOGGLE_LAYERS: [],
+            TOGGLE_PUBLIC_LAYERS: [],
+            TOGGLE_PRIVATE_LAYERS: [],
+            TOGGLE_MENU: [],
+            LOAD_USER_TAGS: [],
+            TAGS_LOADED: [],
+            SAVE_TAGS: [],
+            TAGS_SAVED: [],
 
             BEFORE_SAVE_SETTINGS: [],
             SAVE_SETTINGS: [],
@@ -73,8 +91,20 @@ class EventBroker {
         };
     }
 
-    subscribe(fn, eventType) {
-        this.subscribers[eventType].push(fn);
+    subscribe(fn, eventType, ordinality) {
+        var eventSubscribers = this.subscribers[eventType];
+        if (ordinality && ordinality === Ordinality.Highest) {
+            eventSubscribers.unshift(fn);
+        } else
+            eventSubscribers.push(fn);
+    }
+
+    unsubscribe(fn, eventType) {
+        var eventSubscribers = this.subscribers[eventType];
+        for (var i = 0; i < eventSubscribers.length; i++) {
+            if (eventSubscribers[i].name === fn.name)
+                eventSubscribers.splice(i, 1);
+        }
     }
 
     broadcast(eventType, args) {

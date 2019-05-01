@@ -3,7 +3,8 @@ class MenuViewController {
     constructor(eventBroker) {
         this.eventBroker = eventBroker;
         this.settingsMenu = new SettingsMenuView(eventBroker);
-        this.geoLayersMenu = new GeoLayersMenuView(eventBroker);
+        this.publicLayersMenu = new PublicLayersMenuView(eventBroker);
+        this.privateLayersMenu = new PrivateLayersMenuView(eventBroker);
         this.locationFinderMenu = new LocationFinderMenuView(eventBroker);
 
         this.init();

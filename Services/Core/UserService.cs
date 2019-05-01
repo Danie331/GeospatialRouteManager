@@ -1,5 +1,6 @@
 ﻿
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -38,6 +39,18 @@ namespace Services.Core
                 var authResult = user.PasswordHash.SequenceEqual(textHash);
                 return authResult ? user : null;
             }
+        }
+
+        public async Task<List<MetaTag>> GetMyTagsAsync()
+        {
+            var tags = await _userRepository.GetUserTagsAsync();
+            return tags;
+        }
+
+        public async Task<List<MetaTag>> SaveMyTagsAsync(List<DomainModels.MetaTag> userTags)
+        {
+            await _userRepository.SaveUserTagsAsync(userTags);
+            return await _userRepository.GetUserTagsAsync();
         }
     }
 }

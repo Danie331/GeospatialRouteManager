@@ -7,21 +7,21 @@ using DomainModels.Geospatial;
 using Microsoft.EntityFrameworkCore;
 using Repository.DataContext;
 using System.Linq;
-using Microsoft.AspNetCore.Http;
+using Repository.DataModels;
 
 namespace Repository.Core
 {
     public class GeospatialRepository : IGeospatialRepository
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUserRepository _userRepository;
         private readonly GeospatialContext _geospatialContext;
         private readonly IMapper _mapper;
 
-        public GeospatialRepository(IHttpContextAccessor httpContextAccessor,
+        public GeospatialRepository(IUserRepository userRepository,
             GeospatialContext geospatialContext,
             IMapper mapper)
         {
-            _httpContextAccessor = httpContextAccessor;
+            _userRepository = userRepository;
             _geospatialContext = geospatialContext;
             _mapper = mapper;
         }
@@ -31,17 +31,46 @@ namespace Repository.Core
             var dataDto = _mapper.Map<DataModels.SpatialArea>(layer);
             if (dataDto.Id > 0)
             {
-                var targetLayer = await _geospatialContext.SpatialArea.FirstOrDefaultAsync(sa => sa.Id == dataDto.Id);
+                var targetLayer = await _geospatialContext.SpatialArea
+                                                          .Include(s => s.MetaInfo)
+                                                          .Include(s => s.MetaInfo).ThenInclude(s => s.PublicTag)
+                                                          .Include(s => s.MetaInfo).ThenInclude(s => s.UserTag)
+                                                          .Where(sa => sa.Id == dataDto.Id)
+                                                          .FirstOrDefaultAsync();
                 if (targetLayer != null)
                 {
                     targetLayer.AreaName = dataDto.AreaName;
-                    targetLayer.Level = dataDto.Level;
-                    targetLayer.GeoLayer = dataDto.GeoLayer;
+                    targetLayer.GeoPolygon = dataDto.GeoPolygon;
+
+                    targetLayer.MetaInfo.PublicTag.TagName = dataDto.MetaInfo.PublicTag.TagName;
+                    targetLayer.MetaInfo.PublicTag.TagValue = dataDto.MetaInfo.PublicTag.TagValue;
+                    if (dataDto.MetaInfo.UserTag != null)
+                    {
+                        if (targetLayer.MetaInfo.UserTag == null)
+                        {
+                            targetLayer.MetaInfo.UserTag = new UserTag { TagName = dataDto.MetaInfo.UserTag.TagName, TagValue = dataDto.MetaInfo.UserTag.TagValue, UserId = _userRepository.GetCurrentUserId() };
+                        }
+                        else
+                        {
+                            targetLayer.MetaInfo.UserTag.TagName = dataDto.MetaInfo.UserTag.TagName;
+                            targetLayer.MetaInfo.UserTag.TagValue = dataDto.MetaInfo.UserTag.TagValue;
+                            targetLayer.MetaInfo.UserTag.UserId = _userRepository.GetCurrentUserId();
+                        }
+                    }
                 }
             }
             else
             {
-                dataDto.UserId = int.Parse(_httpContextAccessor.HttpContext.User.Identity.Name);
+                var metaInfo = new DataModels.LayerMetaInfo
+                {
+                    PublicTag = new PublicTag { TagName = dataDto.MetaInfo.PublicTag.TagName, TagValue = dataDto.MetaInfo.PublicTag.TagValue },
+                };
+                if (dataDto.MetaInfo.UserTag != null)
+                {
+                    metaInfo.UserTag = new UserTag { TagName = dataDto.MetaInfo.UserTag.TagName, TagValue = dataDto.MetaInfo.UserTag.TagValue, UserId = _userRepository.GetCurrentUserId() };
+                }
+                dataDto.MetaInfo = metaInfo;
+
                 await _geospatialContext.SpatialArea.AddAsync(dataDto);
             }
 
@@ -51,8 +80,12 @@ namespace Repository.Core
 
         public async Task<List<GeoSpatialLayer>> GetMyAreasAsync()
         {
-            var userId = int.Parse(_httpContextAccessor.HttpContext.User.Identity.Name);
-            var spatialAreas = await _geospatialContext.SpatialArea.Where(s => s.UserId == userId && !s.Deleted).ToListAsync();
+            var userId = _userRepository.GetCurrentUserId();
+            var spatialAreas = await _geospatialContext.SpatialArea
+                                                        .Include(s => s.MetaInfo).ThenInclude(s => s.PublicTag)
+                                                        .Include(s => s.MetaInfo).ThenInclude(s => s.UserTag)
+                                                        .Where(s => s.UserId == userId && !s.Deleted)
+                                                        .ToListAsync();
             var areas = _mapper.Map<List<GeoSpatialLayer>>(spatialAreas);
 
             return areas;
@@ -60,7 +93,11 @@ namespace Repository.Core
 
         public async Task<List<GeoSpatialLayer>> GetAllAreasAsync()
         {
-            var spatialAreas = await _geospatialContext.SpatialArea.Where(s => !s.Deleted).ToListAsync();
+            var spatialAreas = await _geospatialContext.SpatialArea
+                                                        .Include(s => s.MetaInfo).ThenInclude(s => s.PublicTag)
+                                                        .Include(s => s.MetaInfo).ThenInclude(s => s.UserTag)
+                                                        .Where(s => !s.Deleted)
+                                                        .ToListAsync();
             var areas = _mapper.Map<List<GeoSpatialLayer>>(spatialAreas);
 
             return areas;

@@ -11,6 +11,8 @@ namespace Api
             CreateMap<ApiDto.Credentials, DomainModels.Credentials>().ForMember(s => s.Password, g => g.MapFrom(o => o.Pass));
             CreateMap<DomainModels.User, ApiDto.User>();
             CreateMap<ApiDto.User, DomainModels.User>();
+
+            CreateMap<ApiDto.MetaTag, DomainModels.MetaTag>().ReverseMap();
         }
     }
 }

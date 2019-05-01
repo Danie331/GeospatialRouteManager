@@ -9,9 +9,13 @@ namespace Api.ApiDto
         public int Id { get; set; }
         [JsonProperty("LayerName")]
         public string LayerName { get; set; }
-        [JsonProperty("Level")]
-        public int Level { get; set; }
         [JsonProperty("Geojson")]
         public object Geojson { get; set; }
+        [JsonProperty("UserId")]
+        public int UserId { get; set; }
+        [JsonProperty("PublicTag")]
+        public MetaTag PublicTag { get; set; }
+        [JsonProperty("UserTag")]
+        public MetaTag UserTag { get; set; }
     }
 }

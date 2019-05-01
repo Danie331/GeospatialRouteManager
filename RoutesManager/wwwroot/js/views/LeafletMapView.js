@@ -50,7 +50,9 @@ class LeafletMapView {
         this.eventBroker.subscribe(this.onLayerSaved.bind(this), EventType.LAYER_SAVED);
         this.eventBroker.subscribe(this.onLayersLoaded.bind(this), EventType.LAYERS_LOADED);
         this.eventBroker.subscribe(this.onSelectLayer.bind(this), EventType.SELECT_LAYER);
-        this.eventBroker.subscribe(this.toggleLayers.bind(this), EventType.TOGGLE_LAYERS);
+        this.eventBroker.subscribe(this.togglePublicLayers.bind(this), EventType.TOGGLE_PUBLIC_LAYERS);
+        this.eventBroker.subscribe(this.togglePrivateLayers.bind(this), EventType.TOGGLE_PRIVATE_LAYERS);
+        this.eventBroker.subscribe(this.handleSwitchMenus.bind(this), EventType.TOGGLE_MENU, Ordinality.Highest);
 
         return this;
     }
@@ -83,7 +85,8 @@ class LeafletMapView {
             feature.properties = feature.properties || {};
             feature.properties.Id = 0;
 
-            var layerModel = new GeoLayerModel(0, '', 0, '');
+            var userId = localStorage.getItem('user-id');
+            var layerModel = new GeoLayerModel(0, '', '', null, null, userId);
             context.layersCache.push(layerModel);
             context.drawnItems.addLayer(e.layer);
             e.layer.on('click', () => {
@@ -97,13 +100,13 @@ class LeafletMapView {
     onSaveLayer(layerData) {
         var geojson = this.activeLayer.toGeoJSON();
         var id = geojson.properties.Id || 0;
-        this.eventBroker.broadcast(EventType.SAVE_LAYER, new GeoLayerModel(id, layerData.LayerName, layerData.Level, geojson));
+        this.eventBroker.broadcast(EventType.SAVE_LAYER, new GeoLayerModel(id, layerData.LayerName, geojson, layerData.PublicTag, layerData.UserTag));
     }
 
     onDeleteLayer() {
         var geojson = this.activeLayer.toGeoJSON();
         var id = geojson.properties.Id || 0;
-        this.eventBroker.broadcast(EventType.DELETE_LAYER, new GeoLayerModel(id, '', 0, ''));
+        this.eventBroker.broadcast(EventType.DELETE_LAYER, new GeoLayerModel(id, '', '', null, null));
     }
 
     onLayerDeleted(layerModel) {
@@ -134,11 +137,13 @@ class LeafletMapView {
 
         targetLayer.Id = geoLayerModel.Id;
         targetLayer.LayerName = geoLayerModel.LayerName;
-        targetLayer.Level = geoLayerModel.Level;
+        targetLayer.PublicTag = geoLayerModel.PublicTag;
+        targetLayer.UserTag = geoLayerModel.UserTag;
         targetLayer.Geojson = geoLayerModel.Geojson;
+        targetLayer.UserId = geoLayerModel.UserId;
     }
 
-    toggleLayers(selectedLevels) {
+    togglePublicLayers(selectedLevels) {
         this.unselectActiveLayer();
         var context = this;
         this.map.eachLayer(function (layer) {
@@ -151,7 +156,41 @@ class LeafletMapView {
         });
 
         var filteredLayers = _.filter(this.layersCache, layer => {
-            return _.includes(selectedLevels, layer.Level);
+            return _.includes(selectedLevels, layer.PublicTag.TagValue);
+        });
+
+        filteredLayers.forEach(layerModel => {
+            L.geoJson(JSON.parse(layerModel.Geojson), {
+                onEachFeature: function (feature, layer) {
+                    var colour = feature.properties.LayerColour;
+                    layer.setStyle({ color: colour, weight: 1, fillOpacity: 0.7 });
+                    layer.on('click', () => context.handleLayerClick(layer));
+                    context.drawnItems.addLayer(layer);
+                }
+            });
+        });
+        this.eventBroker.broadcast(EventType.AFTER_LAYERS_SHOWN, {});
+    }
+
+    togglePrivateLayers(tags) {
+        this.unselectActiveLayer();
+        var context = this;
+        this.map.eachLayer(function (layer) {
+            if (typeof layer.toGeoJSON === 'undefined')
+                return;
+            var geojson = layer.toGeoJSON();
+            if (_.has(geojson, 'properties')) {
+                context.map.removeLayer(layer);
+            }
+        });
+        var userId = localStorage.getItem('user-id');
+        var filteredLayers = _.filter(this.layersCache, layer => {
+            var userIsOwner = !layer.UserId || (userId == layer.UserId);
+            var canIncludeLayer = true;
+            if (tags && tags.length) {
+                canIncludeLayer = layer.UserTag && _.some(tags, e => e.TagValue !== '' && e.TagValue == layer.UserTag.TagValue);
+            }
+            return userIsOwner && canIncludeLayer;
         });
 
         filteredLayers.forEach(layerModel => {
@@ -173,17 +212,23 @@ class LeafletMapView {
             var geojson = this.activeLayer.toGeoJSON();
             if (geojson.properties.Id == 0) {
                 this.map.removeLayer(this.activeLayer);
+                _.remove(this.layersCache, x => x.Id == 0);
             }
+            this.activeLayer = null;
         }
     }
 
     handleLayerClick(layer) {
         this.unselectActiveLayer();
-
         this.activeLayer = layer;
-        this.activeLayer.editing.enable();
         var geojson = this.activeLayer.toGeoJSON();
         var layerModel = this.layersCache.find(x => x.Id == geojson.properties.Id);
+
+        var userId = localStorage.getItem('user-id');
+        var userIsOwner = (!layerModel || !layerModel.UserId) || (userId == layerModel.UserId);
+        if (userIsOwner) {
+            this.activeLayer.editing.enable();
+        }
         if (!layerModel) {
             layerModel = this.layersCache.find(x => x.Id == 0);
         }
@@ -221,5 +266,9 @@ class LeafletMapView {
                 }
             }
         });
+    }
+
+    handleSwitchMenus() {
+        this.unselectActiveLayer();
     }
 }

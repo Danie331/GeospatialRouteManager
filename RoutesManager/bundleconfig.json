@@ -11,8 +11,11 @@
       "wwwroot/js/models/GeoLocationModel.js",
       "wwwroot/js/models/LabelValueModel.js",
       "wwwroot/js/models/UserSettingsModel.js",
+      "wwwroot/js/models/PublicTagModel.js",
+      "wwwroot/js/models/UserTagModel.js",
 
-      "wwwroot/js/views/GeoLayersMenuView.js",
+      "wwwroot/js/views/PublicLayersMenuView.js",
+      "wwwroot/js/views/PrivateLayersMenuView.js",
       "wwwroot/js/views/GoogleMapView.js",
       "wwwroot/js/views/LeafletMapView.js",
       "wwwroot/js/views/LocationFinderMenuView.js",
