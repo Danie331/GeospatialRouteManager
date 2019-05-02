@@ -40,7 +40,7 @@ class PrivateLayersMenuView {
 
         $("#manageTagsBtn").on('click', e => {
             Swal.fire({
-                title: 'Tags Editor',               
+                title: 'My Tags',               
                 confirmButtonColor: '#3085d6',
                 confirmButtonText: 'Save & Close',
                 showCancelButton: true,
@@ -158,7 +158,7 @@ class PrivateLayersMenuView {
     content() {
         return `<div>  
                     <div class='menu-margins'>
-                        <input id='manageTagsBtn' type='button' value='Tags Editor' />
+                        <input id='manageTagsBtn' type='button' value='My Tags' />
                         <p />
                         <select class="user-tag-selector" name="usertags" multiple="multiple" >
                         </select>
