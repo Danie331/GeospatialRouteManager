@@ -96,5 +96,23 @@ namespace Api.Controllers
             var results = await _geospatialService.GetMatchingSectionalTitlesAsync(searchText, suburbId);
             return _mapper.Map<List<ApiDto.SearchAddress>>(results);
         }
+
+        [HttpPost]
+        [Route("savelocation")]
+        public async Task<ApiDto.GeoLocation> SaveLocation(ApiDto.GeoLocation location)
+        {
+            var locationDto = _mapper.Map<GeoLocation>(location);
+            var result = await _geospatialService.AddLocationAsync(locationDto);
+            var returnDto = _mapper.Map<ApiDto.GeoLocation>(result);
+            return returnDto;
+        }
+
+        [HttpGet]
+        [Route("myplaces")]
+        public async Task<List<ApiDto.GeoLocation>> GetMyPlaces()
+        {
+            var result = await _geospatialService.GetLocationsAsync();
+            return _mapper.Map<List<ApiDto.GeoLocation>>(result);
+        }
     }
 }

@@ -5,6 +5,7 @@ class MapViewController {
         this.eventBroker = eventBroker;
         this.mapProvider = null;
         this.userTagsCache = null;
+        this.selectedLocation = null;
 
         this.init();
     }
@@ -30,6 +31,7 @@ class MapViewController {
     attachHandlers() {
         this.$container.on('click', '.saveGeoLayerButton', {}, this.saveGeoLayerClickHandler.bind(this));
         this.$container.on('click', '.deleteGeoLayerButton', {}, this.deleteGeoLayerClickHandler.bind(this));
+        this.$container.on('click', '.saveLocationButton', {}, this.saveLocationClickHandler.bind(this));
     }
 
     attachEventListeners() {
@@ -40,6 +42,10 @@ class MapViewController {
         this.eventBroker.subscribe(this.onW3wRetrieved.bind(this), EventType.W3W_RETRIEVED);
         this.eventBroker.subscribe(this.onTagsLoaded.bind(this), EventType.TAGS_LOADED);
         this.eventBroker.subscribe(this.onTagsSaved.bind(this), EventType.TAGS_SAVED);
+        this.eventBroker.subscribe(this.onLocationSaving.bind(this), EventType.BEFORE_SAVE_LOCATION);
+        this.eventBroker.subscribe(this.onLocationSaved.bind(this), EventType.LOCATION_SAVED);
+        this.eventBroker.subscribe(this.setLocation.bind(this), EventType.PLOT_LOCATION);
+        this.eventBroker.subscribe(this.setLocation.bind(this), EventType.MARKER_CLICK);
     }
 
     saveGeoLayerClickHandler() {
@@ -55,6 +61,10 @@ class MapViewController {
         var userTag = new UserTagModel('user-tag', userTagValue);
         var layerModel = new GeoLayerModel(0, layerNameInput.val(), '', publicTag, userTag);
         this.eventBroker.broadcast(EventType.BEFORE_SAVE_LAYER, layerModel);
+    }
+
+    saveLocationClickHandler() {
+        this.eventBroker.broadcast(EventType.BEFORE_SAVE_LOCATION, {});
     }
 
     onTagsSaved(userTagsCollection) {
@@ -90,6 +100,22 @@ class MapViewController {
     onGeoLayerSaved() {
         $(".saveGeoLayerButton").val('Save').removeAttr("disabled");
         $.unblockUI();
+    }
+
+    onLocationSaving() {
+        $.blockUI({ message: "<h2 class='loading-text'>Saving...</h2>" });
+        $(".saveLocationButton").val('Saving...').attr("disabled", "disabled");
+
+        var locationNameInput = $(".locationNameInput").val();
+        this.selectedLocation.FriendlyName = locationNameInput;
+        this.eventBroker.broadcast(EventType.SAVE_LOCATION, this.selectedLocation);
+    }
+
+    onLocationSaved(location) {
+        $(".saveLocationButton").val('Update Location').removeAttr("disabled");
+        $.unblockUI();
+
+        this.selectedLocation = new GeoLocationModel(location.LocationId, location.FormattedAddress, location.Lat, location.Lng, location.What3Words, location.ProviderPayload, location.FriendlyName, null);
     }
 
     onLayerClick(layerModel) {
@@ -134,22 +160,30 @@ class MapViewController {
                 </div>`;
     }
 
-    getGeolocationPopupContent(geoLocation) {
+    getGeolocationPopupContent() {
+        var userId = localStorage.getItem('user-id');
+        var userIsOwner = !this.selectedLocation.UserId || (userId == this.selectedLocation.UserId);
+        var saveBtn = this.selectedLocation.LocationId ? "<input class='saveLocationButton' type='button' value='Update Location' />" : "<input class='saveLocationButton' type='button' value='Save Location' />";
         return `<div class='info-window-geolocation'>
                     <span>
                         <div class='info-window-item-row'>
                             <label>Address: </label>
-                            <input class='layerNameInput' type='text' value='${geoLocation.FormattedAddress ? geoLocation.FormattedAddress : "n/a"}' readonly />
+                            <input class='layerNameInput' type='text' value='${this.selectedLocation.FormattedAddress ? this.selectedLocation.FormattedAddress : "n/a"}' readonly />
                         </div>
                         <div class='info-window-item-row'>
                             <label>Lat/Lng: </label>
-                            <input type='text' value='${geoLocation.Lat}, ${geoLocation.Lng}' readonly />
+                            <input type='text' value='${this.selectedLocation.Lat}, ${this.selectedLocation.Lng}' readonly />
                         </div>
                         <div class='info-window-item-row'>
                             <label>What3Words: </label>
-                            <input id='w3wInput-${geoLocation.uniqueIdentifier()}' type='text' value='${!geoLocation.What3Words ? "Loading..." : geoLocation.What3Words}' readonly />
+                            <input id='w3wInput-${this.selectedLocation.uniqueIdentifier()}' type='text' value='${!this.selectedLocation.What3Words ? "Loading..." : this.selectedLocation.What3Words}' readonly />
                         </div>
+                        <div class='info-window-item-row'>
+                            <label>Place name: </label>
+                            <input class='locationNameInput' type='text' value='${this.selectedLocation.FriendlyName ? this.selectedLocation.FriendlyName : ''}' ${!userIsOwner ? "disabled" : ""} />
+                        </div>                       
                         <p />
+                         ${userIsOwner ? saveBtn : ""}
                     </span>
                 </div>`;
     }
@@ -190,5 +224,9 @@ class MapViewController {
             return existingTag ? existingTag.TagValue : "";
         }
         return "";
+    }
+
+    setLocation(locationModel) {
+        this.selectedLocation = locationModel;
     }
 }

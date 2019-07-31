@@ -173,5 +173,33 @@ namespace Repository.Core
             var addressLocation = _mapper.Map<GeoLocation>(targetRecord);
             return addressLocation;
         }
+
+        public async Task<GeoLocation> AddLocationAsync(GeoLocation location)
+        {
+            var addressRecord = _mapper.Map<Address>(location);
+            if (addressRecord.AddressId > 0)
+            {
+                var target = await _geospatialContext.Address.FirstAsync(a => a.AddressId == addressRecord.AddressId);
+                target.FriendlyName = addressRecord.FriendlyName;
+                target.FullAddress = addressRecord.FullAddress;
+                target.GooglePayload = addressRecord.GooglePayload;
+                target.Lat = addressRecord.Lat;
+                target.Lng = addressRecord.Lng;
+                target.What3words = addressRecord.What3words;
+            }
+            else
+            {
+               await _geospatialContext.Address.AddAsync(addressRecord);
+            }
+
+            await _geospatialContext.SaveChangesAsync(); 
+            return _mapper.Map<GeoLocation>(addressRecord);
+        }
+
+        public async Task<List<GeoLocation>> GetLocationsAsync()
+        {
+            var data = await _geospatialContext.Address.ToListAsync();
+            return _mapper.Map<List<GeoLocation>>(data);
+        }
     }
 }

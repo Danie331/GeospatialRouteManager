@@ -22,6 +22,8 @@
         this.eventObserver.subscribe(this.sectionalTitleSearch.bind(this), EventType.SEARCH_SECTIONAL_TITLES);
         this.eventObserver.subscribe(this.getUserTags.bind(this), EventType.LOAD_USER_TAGS);
         this.eventObserver.subscribe(this.saveUserTags.bind(this), EventType.SAVE_TAGS);
+        this.eventObserver.subscribe(this.saveLocation.bind(this), EventType.SAVE_LOCATION);
+        this.eventObserver.subscribe(this.getPlaces.bind(this), EventType.MAP_LOADED);
     }
 
     /////////////////////////////////////////////   API   //////////////////////////////////////////////////
@@ -102,7 +104,7 @@
                 return response.json();
             })
             .then(res => {
-                this.eventObserver.broadcast(EventType.PLOT_LOCATION, new GeoLocationModel(res.LocationId, res.FormattedAddress, res.Lat, res.Lng, res.What3Words, null));
+                this.eventObserver.broadcast(EventType.PLOT_LOCATION, new GeoLocationModel(res.LocationId, res.FormattedAddress, res.Lat, res.Lng, res.What3Words, null, null));
             })
             .catch(err => this.handleApiError(err));
     }
@@ -194,6 +196,40 @@
             })
             .then(userTagsCollection => {
                 this.eventObserver.broadcast(EventType.TAGS_SAVED, userTagsCollection);
+            })
+            .catch(err => this.handleApiError(err));
+    }
+
+    saveLocation(locationModel) {
+        var endpoint = `${this.apiBaseUrl}/geospatial/savelocation`;
+        fetch(endpoint, this.createRequestObject('POST', locationModel))
+            .then(function (response) {
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                }
+                return response.json();
+            })
+            .then(res => {
+                this.eventObserver.broadcast(EventType.LOCATION_SAVED, res);
+            })
+            .catch(err => this.handleApiError(err));
+    }
+
+    getPlaces() {
+        var endpoint = `${this.apiBaseUrl}/geospatial/myplaces`;      
+        fetch(endpoint, this.createRequestObject('GET', null))
+            .then(function (response) {
+                if (!response.ok) {
+                    throw Error(response.statusText);
+                }
+                return response.json();
+            })
+            .then(places => {
+                var placeList = [];
+                places.forEach(place => {
+                    placeList.push(new GeoLocationModel(place.LocationId, place.FormattedAddress, place.Lat, place.Lng, place.What3Words, place.ProviderPayload, place.FriendlyName, null));
+                });
+                this.eventObserver.broadcast(EventType.PLACES_LOADED, placeList);
             })
             .catch(err => this.handleApiError(err));
     }

@@ -23,5 +23,7 @@ namespace Api.ApiDto
         public string ProviderPayload { get; set; }
         [JsonProperty("ValidatedDate")]
         public DateTime? ValidatedDate { get; set; }
+        [JsonProperty("FriendlyName")]
+        public string FriendlyName { get; set; }
     }
 }

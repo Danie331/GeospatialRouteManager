@@ -30,8 +30,12 @@ namespace Repository
                                                                                     a => a.MapFrom(e => e.SsName != null ? $"{e.SsName} ({e.FullAddress})" : e.FullAddress));
 
             CreateMap<DataModels.Address, DomainModels.Geospatial.GeoLocation>().ForMember(s => s.LocationId, a => a.MapFrom(e => e.AddressId))
-                                                                                .ForMember(s => s.FormattedAddress,
-                                                                                    a => a.MapFrom(e => e.SsName != null ? $"{e.SsName} ({e.FullAddress})" : e.FullAddress));
+                                                                                .ForMember(s => s.FormattedAddress, a => a.MapFrom(e => e.SsName != null ? $"{e.SsName} ({e.FullAddress})" : e.FullAddress))
+                                                                                .ForMember(s => s.ProviderPayload, a => a.MapFrom(e => e.GooglePayload));
+
+            CreateMap<DomainModels.Geospatial.GeoLocation, DataModels.Address>().ForMember(s => s.AddressId, a => a.MapFrom(e => e.LocationId))
+                                                                               .ForMember(s => s.FullAddress, a => a.MapFrom(e => e.FormattedAddress))
+                                                                               .ForMember(s => s.GooglePayload, a => a.MapFrom(e => e.ProviderPayload));
 
             CreateMap<DomainModels.MetaTag, DataModels.UserTag>().ReverseMap();//ConvertUsing<MetaToUserTagConvertor>();
             CreateMap<DomainModels.MetaTag, DataModels.PublicTag>().ReverseMap();

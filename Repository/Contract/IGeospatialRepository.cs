@@ -17,5 +17,7 @@ namespace Repository.Contract
         Task<List<SearchAddress>> FindSectionalTitlesContainingStringAsync(string searchText, int suburbId);
         Task<GeoLocation> FindAddressByIdAsync(int locationId);
         Task DeleteGeoLayerAsync(int id);
+        Task<GeoLocation> AddLocationAsync(GeoLocation location);
+        Task<List<GeoLocation>> GetLocationsAsync();
     }
 }

@@ -64,6 +64,16 @@ namespace Repository.DataContext
                     .HasColumnName("what3words")
                     .HasMaxLength(255)
                     .IsUnicode(false);
+
+                entity.Property(e => e.FriendlyName)
+                   .HasColumnName("friendly_name")
+                   .HasMaxLength(255)
+                   .IsUnicode(false);
+
+                entity.Property(e => e.GooglePayload)
+                    .HasColumnName("google_payload")
+                    .IsUnicode(false);
+
             });
 
             modelBuilder.Entity<LayerMetaInfo>(entity =>

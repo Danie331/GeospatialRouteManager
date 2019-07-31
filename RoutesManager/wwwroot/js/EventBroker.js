@@ -16,9 +16,15 @@ const EventType = {
     DELETE_LAYER: 'DELETE_LAYER',
     LAYER_DELETED: 'LAYER_DELETED',
 
-    // map events
+    // location events
     MAP_LOADED: 'MAP_LOADED',
     PLOT_LOCATION: 'PLOT_LOCATION',
+    BEFORE_SAVE_LOCATION: 'BEFORE_SAVE_LOCATION',
+    LOCATION_SAVED: 'LOCATION_SAVED',
+    SAVE_LOCATION: 'SAVE_LOCATION',
+    PLACES_LOADED: 'PLACES_LOADED',
+    MARKER_CLICK: 'MARKER_CLICK',
+    FIND_LOCATION_BY_PLACE_ID: 'FIND_LOCATION_BY_PLACE_ID',
 
     // menu events
     LAYERS_LOADED: 'LAYERS_LOADED',
@@ -63,6 +69,12 @@ class EventBroker {
 
             MAP_LOADED: [],            
             PLOT_LOCATION: [],
+            BEFORE_SAVE_LOCATION: [],
+            LOCATION_SAVED: [],
+            SAVE_LOCATION: [],
+            PLACES_LOADED: [],
+            MARKER_CLICK: [],
+            FIND_LOCATION_BY_PLACE_ID: [],
 
             LAYERS_LOADED: [],
             AFTER_LAYERS_SHOWN: [],

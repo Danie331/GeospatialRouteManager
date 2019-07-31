@@ -11,5 +11,7 @@ namespace Repository.DataModels
         public string SsUnit { get; set; }
         public string What3words { get; set; }
         public int? SuburbId { get; set; }
+        public string FriendlyName { get; set; }
+        public string GooglePayload { get; set; }
     }
 }

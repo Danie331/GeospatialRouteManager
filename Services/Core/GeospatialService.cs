@@ -117,5 +117,15 @@ namespace Services.Core
         {
             return await _geospatialRepository.FindSectionalTitlesContainingStringAsync(searchText, suburbId);
         }
+
+        public async Task<GeoLocation> AddLocationAsync(GeoLocation location)
+        {
+            return await _geospatialRepository.AddLocationAsync(location);
+        }
+
+        public async Task<List<GeoLocation>> GetLocationsAsync()
+        {
+            return await _geospatialRepository.GetLocationsAsync();
+        }
     }
 }

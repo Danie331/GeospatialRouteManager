@@ -50,7 +50,7 @@ class LocationFinderMenuView {
                 $.blockUI({ message: "<h2 class='loading-text'>Finding Location...</h2>" });     
                 event.preventDefault();
                 $(this).val(ui.item.label);
-                var geoLocationModel = new GeoLocationModel(ui.item.value, '', 0, 0, null, null);
+                var geoLocationModel = new GeoLocationModel(ui.item.value, '', 0, 0, null, null, null);
                 context.eventBroker.broadcast(EventType.FIND_LOCATION, geoLocationModel);
             }
         });
@@ -67,7 +67,7 @@ class LocationFinderMenuView {
                 $.blockUI({ message: "<h2 class='loading-text'>Finding Location...</h2>" });     
                 event.preventDefault();
                 $(this).val(ui.item.label);
-                var geoLocationModel = new GeoLocationModel(ui.item.value, '', 0, 0, null, null);
+                var geoLocationModel = new GeoLocationModel(ui.item.value, '', 0, 0, null, null, null);
                 context.eventBroker.broadcast(EventType.FIND_LOCATION, geoLocationModel);
             }
         });
@@ -111,23 +111,24 @@ class LocationFinderMenuView {
     }
 
     handleGoogleLocationSelect(autocomplete) {
-        // BEFORE CALLING GETPLACE(), TRY TO PULL ADDRESS FROM DB
-        // var geoLocationModel = new GeoLocationModel(0, "23 Mcleod St, Stuart`s Hill, Cape Town, 7130, South Africa", -34.07411, 18.849649999999997, "", "{'address_components':[{'long_name':'23','short_name':'23','types':['street_number']},{'long_name':'Mcleod Street','short_name':'Mcleod St','types':['route']},{'long_name':'Stuart`s Hill','short_name':'Stuart`s Hill','types':['sublocality_level_2','sublocality','political']},{'long_name':'Cape Town','short_name':'Cape Town','types':['locality','political']},{'long_name':'Cape Town','short_name':'Cape Town','types':['administrative_area_level_2','political']},{'long_name':'Western Cape','short_name':'WC','types':['administrative_area_level_1','political']},{'long_name':'South Africa','short_name':'ZA','types':['country','political']},{'long_name':'7130','short_name':'7130','types':['postal_code']}],'formatted_address':'23 Mcleod St, Stuart`s Hill, Cape Town, 7130, South Africa','geometry':{'location':{'lat':-34.07411,'lng':18.849649999999997},'viewport':{'south':-34.0755363802915,'west':18.848422769708463,'north':-34.0728384197085,'east':18.85112073029154}},'place_id':'ChIJmQWUUXe1zR0R_oIhG7CV7DM','html_attributions':[]}");
+        //var geoLocationModel = new GeoLocationModel(0, "23 Mcleod St, Stuart`s Hill, Cape Town, 7130, South Africa", -34.07411, 18.849649999999997, "", "{'address_components':[{'long_name':'23','short_name':'23','types':['street_number']},{'long_name':'Mcleod Street','short_name':'Mcleod St','types':['route']},{'long_name':'Stuart`s Hill','short_name':'Stuart`s Hill','types':['sublocality_level_2','sublocality','political']},{'long_name':'Cape Town','short_name':'Cape Town','types':['locality','political']},{'long_name':'Cape Town','short_name':'Cape Town','types':['administrative_area_level_2','political']},{'long_name':'Western Cape','short_name':'WC','types':['administrative_area_level_1','political']},{'long_name':'South Africa','short_name':'ZA','types':['country','political']},{'long_name':'7130','short_name':'7130','types':['postal_code']}],'formatted_address':'23 Mcleod St, Stuart`s Hill, Cape Town, 7130, South Africa','geometry':{'location':{'lat':-34.07411,'lng':18.849649999999997},'viewport':{'south':-34.0755363802915,'west':18.848422769708463,'north':-34.0728384197085,'east':18.85112073029154}},'place_id':'ChIJmQWUUXe1zR0R_oIhG7CV7DM','html_attributions':[]}", null, null);
         var googlePlace = autocomplete.getPlace();
         var googlePayload = JSON.stringify(googlePlace);
         var geoLocationModel = new GeoLocationModel(0, googlePlace.formatted_address,
             googlePlace.geometry.location.lat(),
             googlePlace.geometry.location.lng(),
             null,
-            googlePayload);
+            googlePayload,
+         null);
 
-        $.blockUI({ message: "<h2 class='loading-text'>Finding Location...</h2>" });        
-        this.eventBroker.broadcast(EventType.FIND_LOCATION, geoLocationModel);
+        //$.blockUI({ message: "<h2 class='loading-text'>Finding Location...</h2>" });        
+        //this.eventBroker.broadcast(EventType.FIND_LOCATION, geoLocationModel);
+        this.eventBroker.broadcast(EventType.FIND_LOCATION_BY_PLACE_ID, geoLocationModel);
     }
 
     handleSearchW3W(words) {
         $.blockUI({ message: "<h2 class='loading-text'>Finding Location...</h2>" });
-        this.eventBroker.broadcast(EventType.FIND_LOCATION, new GeoLocationModel(0, null, 0, 0, words, null));
+        this.eventBroker.broadcast(EventType.FIND_LOCATION, new GeoLocationModel(0, null, 0, 0, words, null, null));
     }
 
     onSuburbsRetrieved(suburbsList) {
@@ -143,26 +144,11 @@ class LocationFinderMenuView {
     }
 
     content() {
-        return `<div class='menu-margins'>                    
-                    <span class='menu-search-header underline'>Local Search</span>
-<div class='menu-label-input'>
-                    <label>Suburb: </label>
-                    <input id='localSuburbSearchTextField' type='search' class='inline-search-box' />
-                    </div>
-<div class='menu-label-input'>
-                    <label>Address: </label>
-                    <input id='localAddressSearchTextField' type='search' class='inline-search-box' disabled />
-                    </div>
-<div class='menu-label-input'>
-                    <label>SS Name: </label>
-                    <input id='localSectionalTitleSearchTextField' type='search' class='inline-search-box' disabled />
-                    </div>
+        return `<div class='menu-margins'>                                        
                     <p />
                     <img src='../../img/google_logo.jpg' class='menu-search-logo' />
                     <input id='googleSearchTextField' type='search' class='search-box' />
-                    <p />
-                    <img src='../../img/w3w_logo.png' class='menu-search-logo' />
-                    <input id='w3wSearchField' type='search' class='search-box' placeholder='Enter.three.words ...' />
+                    <p />                    
                 </div>`;
     }
 }

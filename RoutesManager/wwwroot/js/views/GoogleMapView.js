@@ -8,6 +8,8 @@ class GoogleMapView {
         this.layerCache = null;
         this.infowindow = null;
         this.addFeatureEventHandlerInstance = null;
+        this.locationCache = null;
+        this.markerCache = [];
 
         this.init();
     }
@@ -31,6 +33,8 @@ class GoogleMapView {
         this.eventBroker.subscribe(this.togglePrivateLayers.bind(this), EventType.TOGGLE_PRIVATE_LAYERS);
         this.eventBroker.subscribe(this.plotLocationMarker.bind(this), EventType.PLOT_LOCATION);
         this.eventBroker.subscribe(this.handleSwitchMenus.bind(this), EventType.TOGGLE_MENU, Ordinality.Highest);
+        this.eventBroker.subscribe(this.onPlacesLoaded.bind(this), EventType.PLACES_LOADED);
+        this.eventBroker.subscribe(this.handleFindLocationById.bind(this), EventType.FIND_LOCATION_BY_PLACE_ID);
 
         return this;
     }
@@ -302,12 +306,15 @@ class GoogleMapView {
             position: locationPos,
             map: this.map
         });
+        marker.LocationObject = geoLocationModel;
+        this.markerCache.push(marker);
 
         var content = this.viewController.getGeolocationPopupContent(geoLocationModel);
         var context = this;
         marker.addListener('click', function () {
+            context.eventBroker.broadcast(EventType.MARKER_CLICK, this.LocationObject);
             context.infowindow.close();
-            context.infowindow.setContent(context.viewController.getGeolocationPopupContent(geoLocationModel));
+            context.infowindow.setContent(context.viewController.getGeolocationPopupContent());
             context.infowindow.open(context.map, marker);
         });
 
@@ -322,5 +329,60 @@ class GoogleMapView {
 
     handleSwitchMenus() {
         this.unselectActiveLayer();
+    }
+
+    plotLocationMarker2(geoLocationModel) {
+        var locationPos = new google.maps.LatLng(geoLocationModel.Lat, geoLocationModel.Lng);
+        var marker = new google.maps.Marker({
+            position: locationPos,
+            map: this.map
+        });
+        marker.LocationObject = geoLocationModel;
+        this.markerCache.push(marker);
+
+        var context = this;
+        marker.addListener('click', function () {
+            context.eventBroker.broadcast(EventType.MARKER_CLICK, this.LocationObject);
+            context.infowindow.close();
+            context.infowindow.setContent(context.viewController.getGeolocationPopupContent());
+            context.infowindow.open(context.map, marker);
+
+            if (!this.LocationObject.What3Words) {
+                context.eventBroker.broadcast(EventType.FIND_3_WORDS, this.LocationObject);
+            } 
+        });
+    }
+
+    onPlacesLoaded(places) {
+        this.locationCache = places;
+        this.locationCache.forEach(locationModel => {
+            this.plotLocationMarker2(locationModel);
+        });
+    }
+
+    handleFindLocationById(location) {
+        var providerJSON = JSON.parse(location.ProviderPayload);
+        var placeFound = false;
+        this.locationCache.forEach(loc => {
+            var json = null;
+            try {
+                json = JSON.parse(loc.ProviderPayload);
+            }
+            catch (e) { }
+            if (json) {
+                if (json.place_id === providerJSON.place_id) {
+                    placeFound = true;
+                    this.markerCache.forEach(m => {
+                        if (m.LocationObject == loc) {
+                            new google.maps.event.trigger(m, 'click');
+                        }
+                    });
+                }
+            }
+        });
+
+        if (!placeFound) {
+            this.eventBroker.broadcast(EventType.PLOT_LOCATION, location);
+        }
     }
 }
