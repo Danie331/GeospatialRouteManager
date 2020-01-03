@@ -135,6 +135,10 @@ iframe {
   margin: 0 auto;
 }
 
+.limiter2 {
+    margin: 0 auto;
+}
+
 .container-login100 {
   width: 100%;  
   min-height: 100vh;
@@ -425,3 +429,9 @@ iframe {
 
 /*//////////////////////////////////////////////////////////////////
 [ Responsive ]*/
+
+.login-error {
+    display: none;
+    color: red;
+    font-weight: 800;
+}

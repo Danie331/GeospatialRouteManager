@@ -17,24 +17,28 @@
         }
 
         if (check) {
+            $("body").css("cursor", "progress");
             $.ajax({
                 type: 'POST',
                 url: app.LOGIN_URL,
                 data: $(this).serialize()
             }).done((result) => {
+                $("body").css("cursor", "default");
                 localStorage.setItem('access-token', result.Token);
                 localStorage.setItem('default-map', result.DefaultMapProvider);
                 localStorage.setItem('user-id', result.UserId);
                 localStorage.setItem('user-friendly-name', result.FriendlyName);
                 window.location = app.DEFAULT_PAGE;
-                }).fail(function (jqXHR, textStatus, error) {
-                    if (error === "Unauthorized") {
-                        console.log("Unauthorized");
-                        localStorage.setItem('access-token', '');
-                    } else {
-                        console.log(error);
-                    }
-                });
+            }).fail(function (jqXHR, textStatus, error) {
+                $("body").css("cursor", "default");
+                if (error === "Unauthorized") {
+                    console.log("Unauthorized");
+                    localStorage.setItem('access-token', '');
+                    $(".login-error").show();
+                } else {
+                    console.log(error);
+                }
+            });
         }
         return false;
     });

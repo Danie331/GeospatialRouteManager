@@ -160,6 +160,24 @@ class MapViewController {
                 </div>`;
     }
 
+    getGeoLayerHoverContent(geoLayer) {
+        return `<div>
+                    <span>
+                        <div class='info-window-item-row'>
+                            <label>Layer name: </label>
+                            <input class='layerNameInput' type='text' value='${geoLayer.LayerName ? geoLayer.LayerName : ''}' disabled />
+                        </div>
+                        <div class='info-window-item-row'>
+                            <label>Priority level: </label>
+                            ${this.renderLayerLevelSetting({ UserId: -99999, PublicTag: geoLayer.PublicTag })}
+                        </div>
+                        <div class='info-window-item-row'>
+                            ${this.renderUserTagOptions({ UserId: -99999, UserTag: geoLayer.UserTag })}
+                        </div>
+                    </span>
+                </div>`;
+    }
+
     getGeolocationPopupContent() {
         var userId = localStorage.getItem('user-id');
         var userIsOwner = !this.selectedLocation.UserId || (userId == this.selectedLocation.UserId);

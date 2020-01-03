@@ -69,6 +69,26 @@ class GoogleMapView {
                         strokeWeight: 1
                     }
                 });
+                this.map.data.addListener('mouseover', function (event) {
+                    var id = event.feature.getProperty("Id");
+                    if (context.selectedLayer && context.selectedLayer.getProperty("Id") == id) {
+                        return;
+                    }
+                    var targetLayer = context.layerCache.find(x => x.Id == id);
+                    if (!targetLayer) {
+                        return; // NB.: return in this instance due to indeterminate order of firing of google events.
+                    }
+                    var content = context.viewController.getGeoLayerHoverContent(targetLayer);
+                    event.feature.infowindow = event.feature.infowindow || new google.maps.InfoWindow();
+                    event.feature.infowindow.setContent(content);
+                    event.feature.infowindow.setPosition(event.latLng);
+                    event.feature.infowindow.open(this.map);
+                });
+                this.map.data.addListener('mouseout', function (event) {
+                    if (event.feature.infowindow) {
+                        event.feature.infowindow.close();
+                    }
+                });
 
                 this.infowindow = new google.maps.InfoWindow();
                 this.eventBroker.broadcast(EventType.MAP_LOADED, {});
@@ -194,6 +214,9 @@ class GoogleMapView {
     handleLayerClick(feature) {       
         this.unselectActiveLayer();
         this.selectedLayer = feature;
+        if (this.selectedLayer.infowindow) {
+            this.selectedLayer.infowindow.close();
+        }
         var id = this.selectedLayer.getProperty("Id");
         var targetLayer = this.layerCache.find(x => x.Id == id);
         if (!targetLayer) {
