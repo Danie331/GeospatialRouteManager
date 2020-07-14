@@ -25,11 +25,8 @@ class LeafletMapView {
                 zoom: 10,
                 dragging: true
             });
-            L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZGFuaWUzMzAiLCJhIjoiY2pxeTlqc242MDE5cTQzcnpubHlyeTJucyJ9.Omq9E98-rSVM2EWccOdFtg', {
-                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-                maxZoom: 30,
-                id: 'mapbox.streets',
-                accessToken: 'pk.eyJ1IjoiZGFuaWUzMzAiLCJhIjoiY2pxeTlqc242MDE5cTQzcnpubHlyeTJucyJ9.Omq9E98-rSVM2EWccOdFtg'
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(this.map);
 
             this.enableDrawing();

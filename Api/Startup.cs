@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Repository.DataContext;
 
 namespace Api
 {
@@ -72,7 +73,7 @@ namespace Api
                 app.UseDeveloperExceptionPage();
             }
             else
-            {                
+            {
                 app.UseHsts();
             }
 
@@ -81,6 +82,13 @@ namespace Api
             app.UseAuthentication();
             app.UseCors("CorsPolicy");
             app.UseMvc();
+
+            var serviceScopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
+            using (var serviceScope = serviceScopeFactory.CreateScope())
+            {
+                var dbContext = serviceScope.ServiceProvider.GetService<GeospatialContext>();
+                dbContext.Database.EnsureCreated();
+            }
         }
     }
 }

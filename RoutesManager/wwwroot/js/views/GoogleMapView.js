@@ -41,7 +41,7 @@ class GoogleMapView {
 
     createMapScript() {
         var script = document.createElement('script');
-        script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDQ3eXd26fw0zaOG95D4u5vgki7asjfY4I&callback=initGoogleMap&libraries=drawing,places";
+        script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyAlu_iLPTGNJ3zVsv_-mUe4umYw4QMcKw4&callback=initGoogleMap&libraries=drawing,places";
         document.body.appendChild(script);
 
         return this;
